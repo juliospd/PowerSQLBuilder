@@ -85,6 +85,7 @@ type
     function Limit( const Value : Integer ) : TPowerSQLBuilder; virtual;
     function Like( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Next : TPowerSQLBuilder; virtual;
+    function Fields( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function BetWeen( const ValueStart, ValueEnd : TDateTime; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Integer ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
@@ -381,6 +382,11 @@ begin
   end;
 
   Result := Self;
+end;
+
+function TPowerSQLBuilder.Fields(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' (').Add( Value ).EndValues;
 end;
 
 function TPowerSQLBuilder.Field(const Value: WideString): TPowerSQLBuilder;
