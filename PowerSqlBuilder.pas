@@ -75,6 +75,7 @@ type
     function Where( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Where( const Value : WideString; const Cast : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Order_By( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function Desc : TPowerSQLBuilder; virtual;
     function Group_By( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Values : TPowerSQLBuilder; virtual;
     function EndValues : TPowerSQLBuilder; virtual;
@@ -171,6 +172,11 @@ end;
 constructor TPowerSQLBuilder.Create;
 begin
   Self.FValuePSB := '';
+end;
+
+function TPowerSQLBuilder.Desc: TPowerSQLBuilder;
+begin
+  Result := Add(' Desc');
 end;
 
 destructor TPowerSQLBuilder.Destroy;
@@ -451,7 +457,7 @@ end;
 
 function TPowerSQLBuilder.Like(const Value: WideString): TPowerSQLBuilder;
 begin
-  Result := AddQuoted( Value + '%' );
+  Result := Add(' like ').AddQuoted( Trim(Value) + '%' );
 end;
 
 function TPowerSQLBuilder.Limit(const Value: Integer): TPowerSQLBuilder;
