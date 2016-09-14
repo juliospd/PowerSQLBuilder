@@ -40,12 +40,22 @@ uses
   IdBaseComponent, IdComponent, IdRawBase, IdRawClient, IdIcmpClient;
 
 type
-  TDataSqlBuilder = class
+  TSQLQuery = class( TPowerSQLBuilder )
   private
     FDataSet : TDataSet;
+    FFieldBytea: TMemoryStream;
+
+    procedure SetFieldBytea(const Value: TMemoryStream);
     procedure SetDataSet(const Value: TDataSet);
   public
     property DataSet : TDataSet read FDataSet write SetDataSet;
+    property FieldBytea : TMemoryStream read FFieldBytea write SetFieldBytea;
+
+    function Execute(var Query : TZQuery ) : TSqlQuery; overload;
+    function Execute(var Query : TFDQuery ) : TSqlQuery; overload;
+    function Open(var query : TZQuery ) : TSqlQuery; overload;
+    function Open(var query : TFDQuery ) : TSqlQuery; overload;
+
     function GetI( NameField : WideString ) : Integer; overload;
     function GetL( NameField : WideString ) : Int64; overload;
     function GetW( NameField : WideString ) : WideString; overload;
@@ -54,23 +64,7 @@ type
     function GetC( NameField : WideString ) : Currency; overload;
     function GetB( NameField : WideString ) : Boolean; overload;
     function GetD( NameField : WideString ) : TDateTime; overload;
-  end;
-
-  TSQLQuery = class( TPowerSQLBuilder )
-  private
-    FData : TDataSqlBuilder;
-
-    procedure SetData(const Value: TDataSqlBuilder);
-  public
-    property Data : TDataSqlBuilder read FData write SetData;
-
-    function Execute(var Query : TZQuery ) : TSqlQuery; overload;
-    function Execute(var Query : TFDQuery ) : TSqlQuery; overload;
-    function Open(var query : TZQuery ) : TSqlQuery; overload;
-    function Open(var query : TFDQuery ) : TSqlQuery; overload;
-
-    constructor Create; virtual;
-    destructor Destroy; override;
+    function GetS( NameField : WideString ) : TMemoryStream; overload;
   end;
 
 function Ping(const AHost : string) : Boolean;
@@ -94,6 +88,10 @@ begin
         Query.Close;
         Query.SQL.Clear;
         Query.SQL.Add( GetString );
+
+        if Assigned( Self.FFieldBytea ) then
+          Query.Params.ParamByName('file').LoadFromStream( Self.FFieldBytea, ftBlob );
+
         Query.ExecSQL;
 
         Executed := True;
@@ -136,7 +134,7 @@ begin
         Query.SQL.Add( GetString );
         Query.Open;
 
-        Self.FData.DataSet := (Query as TDataSet);
+        Self.FDataSet := (Query as TDataSet);
 
         Executed := True;
       except
@@ -161,17 +159,6 @@ begin
   end;
 end;
 
-constructor TSqlQuery.Create;
-begin
-  Self.FData := TDataSqlBuilder.Create;
-end;
-
-destructor TSqlQuery.Destroy;
-begin
-  FreeAndNil( Self.FData );
-  inherited;
-end;
-
 function TSqlQuery.Execute(var Query: TFDQuery): TSqlQuery;
 var
   Executed : Boolean;
@@ -187,6 +174,10 @@ begin
         Query.Close;
         Query.SQL.Clear;
         Query.SQL.Add( GetString );
+
+        if Assigned( Self.FFieldBytea ) then
+          Query.Params.ParamByName('file').LoadFromStream( Self.FFieldBytea, ftBlob );
+
         Query.ExecSQL;
 
         Executed := True;
@@ -229,7 +220,7 @@ begin
         Query.SQL.Add( GetString );
         Query.Open;
 
-        Self.FData.DataSet := Query.DataSource.DataSet;
+        Self.FDataSet := Query.DataSource.DataSet;
 
         Executed := True;
       except
@@ -254,54 +245,58 @@ begin
   end;
 end;
 
-procedure TSqlQuery.SetData(const Value: TDataSqlBuilder);
-begin
-  FData := Value;
-end;
-
-{ TSqlFiedBuilder }
-
-function TDataSqlBuilder.GetI(NameField: WideString): Integer;
-begin
-  Result := Self.FDataSet.FieldByName(NameField).AsInteger;
-end;
-
-function TDataSqlBuilder.GetW(NameField: WideString): WideString;
-begin
-  Result := Self.FDataSet.FieldByName(NameField).AsWideString;
-end;
-
-procedure TDataSqlBuilder.SetDataSet(const Value: TDataSet);
+procedure TSQLQuery.SetDataSet(const Value: TDataSet);
 begin
   FDataSet := Value;
 end;
 
-function TDataSqlBuilder.GetF(NameField: WideString): Double;
+procedure TSQLQuery.SetFieldBytea(const Value: TMemoryStream);
+begin
+  FFieldBytea := Value;
+end;
+
+function TSQLQuery.GetI(NameField: WideString): Integer;
+begin
+  Result := Self.FDataSet.FieldByName(NameField).AsInteger;
+end;
+
+function TSQLQuery.GetW(NameField: WideString): WideString;
+begin
+  Result := Self.FDataSet.FieldByName(NameField).AsWideString;
+end;
+
+function TSQLQuery.GetF(NameField: WideString): Double;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsFloat;
 end;
 
-function TDataSqlBuilder.GetL(NameField: WideString): Int64;
+function TSQLQuery.GetL(NameField: WideString): Int64;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsLargeInt;
 end;
 
-function TDataSqlBuilder.GetB(NameField: WideString): Boolean;
+function TSQLQuery.GetS(NameField: WideString): TMemoryStream;
+begin
+  Result := TMemoryStream.Create;
+  TBlobField( Self.FDataSet.FieldByName( NameField )).SaveToStream( Result );
+end;
+
+function TSQLQuery.GetB(NameField: WideString): Boolean;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsBoolean;
 end;
 
-function TDataSqlBuilder.GetD(NameField: WideString): TDateTime;
+function TSQLQuery.GetD(NameField: WideString): TDateTime;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsDateTime;
 end;
 
-function TDataSqlBuilder.GetA(NameField: WideString): AnsiString;
+function TSQLQuery.GetA(NameField: WideString): AnsiString;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsAnsiString;
 end;
 
-function TDataSqlBuilder.GetC(NameField: WideString): Currency;
+function TSQLQuery.GetC(NameField: WideString): Currency;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsCurrency;
 end;
