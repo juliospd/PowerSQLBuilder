@@ -33,7 +33,10 @@ type
   TPowerSQLBuilder = class(TObject)
   private
     FValuePSB : WideString;
+    FPostGreSQL: Boolean;
+    procedure SetPostGreSQL(const Value: Boolean);
   public
+    property PostGreSQL : Boolean read FPostGreSQL write SetPostGreSQL;
     // StringBuilder Padrão
     function Add(const Value : WideString) : TPowerSQLBuilder; virtual;
     function AddQuoted(const Value : WideString) : TPowerSQLBuilder; virtual;
@@ -41,27 +44,27 @@ type
     function Equal( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function Equal( const Value : TDateTime; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; overload; virtual;
+    function Equal( const Value : TDateTime ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
-    function Equal( const Value : Boolean; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; overload; virtual;
-    function EqualOfDate( const Value : TDateTime; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; virtual;
-    function EqualOfTime( const Value : TDateTime; PostGreSQL : Boolean = false; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
+    function Equal( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
+    function EqualOfDate( const Value : TDateTime ) : TPowerSQLBuilder; virtual;
+    function EqualOfTime( const Value : TDateTime; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
     function Field( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function Field( const Value : TDateTime; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; overload; virtual;
+    function Field( const Value : TDateTime ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
-    function Field( const Value : Boolean; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; overload; virtual;
-    function FieldOfDate( const Value : TDateTime; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; virtual;
-    function FieldOfTime( const Value : TDateTime; PostGreSQL : Boolean = false; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
+    function Field( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
+    function FieldOfDate( const Value : TDateTime ) : TPowerSQLBuilder; virtual;
+    function FieldOfTime( const Value : TDateTime; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
     function UpField( Field : WideString; const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function UpField( Field : WideString; const Value : TDateTime; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; overload; virtual;
+    function UpField( Field : WideString; const Value : TDateTime ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
-    function UpField( Field : WideString; const Value : Boolean; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; overload; virtual;
-    function UpFieldOfDate( Field : WideString; const Value : TDateTime; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; virtual;
-    function UpFieldOfTime( Field : WideString; const Value : TDateTime; PostGreSQL : Boolean = false; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
+    function UpField( Field : WideString; const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
+    function UpFieldOfDate( Field : WideString; const Value : TDateTime ) : TPowerSQLBuilder; virtual;
+    function UpFieldOfTime( Field : WideString; const Value : TDateTime; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
     function Clear : TPowerSQLBuilder; virtual;
     function GetString : WideString; virtual;
     // Power SQL
@@ -87,17 +90,20 @@ type
     function Like( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Next : TPowerSQLBuilder; virtual;
     function Fields( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function BetWeen( const ValueStart, ValueEnd : TDateTime; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; overload; virtual;
+    function BetWeen( const ValueStart, ValueEnd : TDateTime ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Integer ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function BetWeenOfDate( const ValueStart, ValueEnd : TDateTime; PostGreSQL : Boolean = false ) : TPowerSQLBuilder; virtual;
-    function BetWeenOfTime( const ValueStart, ValueEnd : TDateTime; PostGreSQL : Boolean = false; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
+    function BetWeenOfDate( const ValueStart, ValueEnd : TDateTime ) : TPowerSQLBuilder; virtual;
+    function BetWeenOfTime( const ValueStart, ValueEnd : TDateTime; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
     function Cast( Field : WideString; const Value : WideString ) : TPowerSQLBuilder; virtual;
     //
+    function &NOT( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &OR( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &AND( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &ON( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &IN( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &NOT_IN(const Value : WideString ) : TPowerSQLBuilder; virtual;
 
     constructor Create;
     destructor Destroy; override;
@@ -110,6 +116,16 @@ implementation
 function TPowerSQLBuilder.&ON(const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' on (').Add( Value ).EndValues;
+end;
+
+function TPowerSQLBuilder.&IN(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' in (');
+end;
+
+function TPowerSQLBuilder.&NOT_IN(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' not in (');
 end;
 
 function TPowerSQLBuilder.Add(const Value: WideString): TPowerSQLBuilder;
@@ -143,19 +159,19 @@ begin
   Result := Add(' between ').Field( ValueStart ).Add(' and ').Field( ValueEnd );
 end;
 
-function TPowerSQLBuilder.BetWeen(const ValueStart, ValueEnd: TDateTime; PostGreSQL : Boolean = false): TPowerSQLBuilder;
+function TPowerSQLBuilder.BetWeen(const ValueStart, ValueEnd: TDateTime ): TPowerSQLBuilder;
 begin
   Result := Add(' between ').Field( ValueStart ).Add(' and ').Field( ValueEnd );
 end;
 
-function TPowerSQLBuilder.BetWeenOfDate(const ValueStart, ValueEnd: TDateTime; PostGreSQL : Boolean = false): TPowerSQLBuilder;
+function TPowerSQLBuilder.BetWeenOfDate(const ValueStart, ValueEnd: TDateTime ): TPowerSQLBuilder;
 begin
-  Result := Add(' between ').FieldOfDate( ValueStart, PostGreSQL ).Add(' and ').FieldOfDate( ValueEnd, PostGreSQL );
+  Result := Add(' between ').FieldOfDate( ValueStart ).Add(' and ').FieldOfDate( ValueEnd );
 end;
 
-function TPowerSQLBuilder.BetWeenOfTime(const ValueStart, ValueEnd: TDateTime; PostGreSQL : Boolean = false; Seconds : Boolean = True): TPowerSQLBuilder;
+function TPowerSQLBuilder.BetWeenOfTime(const ValueStart, ValueEnd: TDateTime; Seconds : Boolean = True): TPowerSQLBuilder;
 begin
-  Result := Add(' between ').FieldOfTime( ValueStart, PostGreSQL, Seconds ).Add(' and ').FieldOfTime( ValueEnd, PostGreSQL, Seconds );
+  Result := Add(' between ').FieldOfTime( ValueStart, Seconds ).Add(' and ').FieldOfTime( ValueEnd, Seconds );
 end;
 
 function TPowerSQLBuilder.Cast(Field: WideString; const Value: WideString): TPowerSQLBuilder;
@@ -185,9 +201,9 @@ begin
   inherited;
 end;
 
-function TPowerSQLBuilder.Equal(const Value: TDateTime; PostGreSQL: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.Equal(const Value: TDateTime ): TPowerSQLBuilder;
 begin
-  if PostGreSQL then
+  if Self.FPostGreSQL then
   begin
     if DateOf(Value) = 0 then
       Add(' = null ')
@@ -225,9 +241,9 @@ begin
   Result := Add(')');
 end;
 
-function TPowerSQLBuilder.Equal(const Value: Boolean; PostGreSQL: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.Equal(const Value: Boolean): TPowerSQLBuilder;
 begin
-  if PostGreSQL then
+  if Self.FPostGreSQL then
     Add(' = ').Add( IfThen(Value, 'true', 'false') )
   else
     Add(' = ').Add( IfThen(Value, '1', '0') );
@@ -240,9 +256,9 @@ begin
   Result := Add(' = ').Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
 end;
 
-function TPowerSQLBuilder.EqualOfDate(const Value: TDateTime; PostGreSQL: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.EqualOfDate(const Value: TDateTime): TPowerSQLBuilder;
 begin
-  if PostGreSQL then
+  if Self.FPostGreSQL then
   begin
     if DateOf(Value) = 0 then
       Add(' = null ')
@@ -260,9 +276,9 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.EqualOfTime(const Value: TDateTime; PostGreSQL: Boolean; Seconds : Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.EqualOfTime(const Value: TDateTime; Seconds : Boolean): TPowerSQLBuilder;
 begin
-  if PostGreSQL then
+  if Self.FPostGreSQL then
   begin
     if DateOf(Value) = 0 then
       Add(' = null ')
@@ -295,9 +311,9 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.Field(const Value: TDateTime; PostGreSQL: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.Field(const Value: TDateTime): TPowerSQLBuilder;
 begin
-  if PostGreSQL then
+  if Self.FPostGreSQL then
   begin
     if DateOf(Value) = 0 then
       Add('null')
@@ -320,9 +336,9 @@ begin
   Result := Add( IntToStr( Value ) );
 end;
 
-function TPowerSQLBuilder.Field(const Value: Boolean; PostGreSQL: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.Field(const Value: Boolean): TPowerSQLBuilder;
 begin
-  if PostGreSQL then
+  if Self.FPostGreSQL then
     Add( IfThen(Value, 'true', 'false') )
   else
     Add( IfThen(Value, '1', '0') );
@@ -335,9 +351,9 @@ begin
   Result := Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
 end;
 
-function TPowerSQLBuilder.FieldOfDate(const Value: TDateTime; PostGreSQL: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.FieldOfDate(const Value: TDateTime): TPowerSQLBuilder;
 begin
-  if PostGreSQL then
+  if Self.FPostGreSQL then
   begin
     if DateOf(Value) = 0 then
       Add('null')
@@ -355,9 +371,9 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.FieldOfTime(const Value: TDateTime; PostGreSQL, Seconds: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.FieldOfTime(const Value: TDateTime; Seconds: Boolean): TPowerSQLBuilder;
 begin
-  if PostGreSQL then
+  if Self.FPostGreSQL then
   begin
     if DateOf(Value) = 0 then
       Add('null')
@@ -475,6 +491,11 @@ begin
   Result := Add(' or ').Add( Value );
 end;
 
+function TPowerSQLBuilder.&NOT( const Value : WideString ) : TPowerSQLBuilder;
+begin
+  Result := Add(' not ').Add( Value );
+end;
+
 function TPowerSQLBuilder.Order_By( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add(' order by ').Add( Value );
@@ -493,6 +514,11 @@ end;
 function TPowerSQLBuilder.SelectFrom( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add('select * from ').Add( Value );
+end;
+
+procedure TPowerSQLBuilder.SetPostGreSQL(const Value: Boolean);
+begin
+  FPostGreSQL := Value;
 end;
 
 function TPowerSQLBuilder.Update( const Value : WideString ) : TPowerSQLBuilder;
@@ -515,9 +541,9 @@ begin
   Result := Add( Field ).Equal( Value );
 end;
 
-function TPowerSQLBuilder.UpField(Field: WideString; const Value: Boolean; PostGreSQL: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: WideString; const Value: Boolean): TPowerSQLBuilder;
 begin
-  Result := Add( Field ).Equal( Value, PostGreSQL );
+  Result := Add( Field ).Equal( Value );
 end;
 
 function TPowerSQLBuilder.UpField(Field: WideString; const Value: Integer): TPowerSQLBuilder;
@@ -525,19 +551,19 @@ begin
   Result := Add( Field ).Equal( Value );
 end;
 
-function TPowerSQLBuilder.UpField(Field: WideString; const Value: TDateTime; PostGreSQL: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: WideString; const Value: TDateTime ): TPowerSQLBuilder;
 begin
-  Result := Add( Field ).Equal( Value, PostGreSQL );
+  Result := Add( Field ).Equal( Value );
 end;
 
-function TPowerSQLBuilder.UpFieldOfDate(Field: WideString; const Value: TDateTime; PostGreSQL: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpFieldOfDate(Field: WideString; const Value: TDateTime ): TPowerSQLBuilder;
 begin
-  Result := Add( Field ).EqualOfDate( Value, PostGreSQL );
+  Result := Add( Field ).EqualOfDate( Value );
 end;
 
-function TPowerSQLBuilder.UpFieldOfTime(Field: WideString; const Value: TDateTime; PostGreSQL, Seconds: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpFieldOfTime(Field: WideString; const Value: TDateTime; Seconds: Boolean): TPowerSQLBuilder;
 begin
-  Result := Add( Field ).EqualOfTime( Value, PostGreSQL, Seconds );
+  Result := Add( Field ).EqualOfTime( Value, Seconds );
 end;
 
 function TPowerSQLBuilder.Values: TPowerSQLBuilder;
