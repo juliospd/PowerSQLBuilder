@@ -45,6 +45,7 @@ type
     function Equal( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : TDateTime ) : TPowerSQLBuilder; overload; virtual;
+    function Equal( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function EqualOfDate( const Value : TDateTime ) : TPowerSQLBuilder; virtual;
@@ -53,6 +54,7 @@ type
     function Field( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : TDateTime ) : TPowerSQLBuilder; overload; virtual;
+    function Field( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function FieldOfDate( const Value : TDateTime ) : TPowerSQLBuilder; virtual;
@@ -61,6 +63,7 @@ type
     function UpField( Field : WideString; const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : TDateTime ) : TPowerSQLBuilder; overload; virtual;
+    function UpField( Field : WideString; const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function UpFieldOfDate( Field : WideString; const Value : TDateTime ) : TPowerSQLBuilder; virtual;
@@ -91,6 +94,7 @@ type
     function Next : TPowerSQLBuilder; virtual;
     function Fields( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function BetWeen( const ValueStart, ValueEnd : TDateTime ) : TPowerSQLBuilder; overload; virtual;
+    function BetWeen( const ValueStart, ValueEnd : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Integer ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
@@ -152,6 +156,11 @@ end;
 function TPowerSQLBuilder.BetWeen(const ValueStart, ValueEnd: Currency; DecimalValue: ShortInt): TPowerSQLBuilder;
 begin
   Result := Add(' between ').Field( ValueStart, DecimalValue ).Add(' and ').Field( ValueEnd, DecimalValue );
+end;
+
+function TPowerSQLBuilder.BetWeen(const ValueStart, ValueEnd: Int64): TPowerSQLBuilder;
+begin
+  Result := Add(' between ').Field( ValueStart ).Add(' and ').Field( ValueEnd );
 end;
 
 function TPowerSQLBuilder.BetWeen(const ValueStart, ValueEnd: Integer): TPowerSQLBuilder;
@@ -251,6 +260,11 @@ begin
   Result := Self;
 end;
 
+function TPowerSQLBuilder.Equal(const Value: Int64): TPowerSQLBuilder;
+begin
+  Result := Add(' = ').Add( IntToStr( Value ) );
+end;
+
 function TPowerSQLBuilder.Equal(const Value: Currency; DecimalValue: ShortInt): TPowerSQLBuilder;
 begin
   Result := Add(' = ').Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
@@ -344,6 +358,11 @@ begin
     Add( IfThen(Value, '1', '0') );
 
   Result := Self;
+end;
+
+function TPowerSQLBuilder.Field(const Value: Int64): TPowerSQLBuilder;
+begin
+  Result := Add( IntToStr( Value ) );
 end;
 
 function TPowerSQLBuilder.Field(const Value: Currency; DecimalValue: ShortInt): TPowerSQLBuilder;
@@ -542,6 +561,11 @@ begin
 end;
 
 function TPowerSQLBuilder.UpField(Field: WideString; const Value: Boolean): TPowerSQLBuilder;
+begin
+  Result := Add( Field ).Equal( Value );
+end;
+
+function TPowerSQLBuilder.UpField(Field: WideString; const Value: Int64): TPowerSQLBuilder;
 begin
   Result := Add( Field ).Equal( Value );
 end;
