@@ -72,7 +72,8 @@ type
     function GetString : WideString; virtual;
     // Power SQL
     function Insert( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function Select( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function Select : TPowerSQLBuilder; overload; virtual;
+    function Select( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function SelectFrom( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Update( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Delete( const Value : WideString ) : TPowerSQLBuilder; virtual;
@@ -101,13 +102,21 @@ type
     function BetWeenOfDate( const ValueStart, ValueEnd : TDateTime ) : TPowerSQLBuilder; virtual;
     function BetWeenOfTime( const ValueStart, ValueEnd : TDateTime; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
     function Cast( Field : WideString; const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function Distinct : TPowerSQLBuilder; overload; virtual;
+    function Distinct( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Count : TPowerSQLBuilder; virtual;
+    function Max(const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function Min(const Value : WideString ) : TPowerSQLBuilder; Virtual;
     //
+    function &As( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &NOT( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &OR( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &AND( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &ON( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &IN( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &NOT_IN(const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &IN : TPowerSQLBuilder;  overload; virtual;
+    function &IN( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &NOT_IN : TPowerSQLBuilder; overload; virtual;
+    function &NOT_IN(const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
 
     constructor Create;
     destructor Destroy; override;
@@ -124,12 +133,22 @@ end;
 
 function TPowerSQLBuilder.&IN(const Value: WideString): TPowerSQLBuilder;
 begin
-  Result := Add(' in (');
+  Result := Add(' in (').Add( Value );
 end;
 
 function TPowerSQLBuilder.&NOT_IN(const Value: WideString): TPowerSQLBuilder;
 begin
-  Result := Add(' not in (');
+  Result := Add(' not in (').Add( Value );
+end;
+
+function TPowerSQLBuilder.&IN: TPowerSQLBuilder;
+begin
+  Result := Add(' in (');
+end;
+
+function TPowerSQLBuilder.&As(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' as ').Add( Value );
 end;
 
 function TPowerSQLBuilder.Add(const Value: WideString): TPowerSQLBuilder;
@@ -194,6 +213,11 @@ begin
   Result := Self;
 end;
 
+function TPowerSQLBuilder.Count: TPowerSQLBuilder;
+begin
+  Result := Add(' count(*)');
+end;
+
 constructor TPowerSQLBuilder.Create;
 begin
   Self.FValuePSB := '';
@@ -208,6 +232,16 @@ destructor TPowerSQLBuilder.Destroy;
 begin
   Self.FValuePSB := '';
   inherited;
+end;
+
+function TPowerSQLBuilder.Distinct( const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' Distinct ').Add( Value );
+end;
+
+function TPowerSQLBuilder.Distinct: TPowerSQLBuilder;
+begin
+  Result := Add(' Distinct');
 end;
 
 function TPowerSQLBuilder.Equal(const Value: TDateTime ): TPowerSQLBuilder;
@@ -500,6 +534,16 @@ begin
   Result := Add(' limit ').Field(Value);
 end;
 
+function TPowerSQLBuilder.Max(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' max(').Add( Value ).EndValues
+end;
+
+function TPowerSQLBuilder.Min(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' min(').Add( Value ).EndValues
+end;
+
 function TPowerSQLBuilder.Next: TPowerSQLBuilder;
 begin
   Result := Add(', ');
@@ -515,6 +559,11 @@ begin
   Result := Add(' not ').Add( Value );
 end;
 
+function TPowerSQLBuilder.NOT_IN: TPowerSQLBuilder;
+begin
+  Result := Add(' not in (')
+end;
+
 function TPowerSQLBuilder.Order_By( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add(' order by ').Add( Value );
@@ -528,6 +577,11 @@ end;
 function TPowerSQLBuilder.Select( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add('select ').Add( Value );
+end;
+
+function TPowerSQLBuilder.Select: TPowerSQLBuilder;
+begin
+  Result := Add('select ');
 end;
 
 function TPowerSQLBuilder.SelectFrom( const Value : WideString ) : TPowerSQLBuilder;
