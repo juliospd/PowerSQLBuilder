@@ -163,7 +163,7 @@ function TSqlQuery.Execute(var Query: TFDQuery): TSqlQuery;
 var
   Executed : Boolean;
 begin
-  if not Ping( Query.Connection.ConnectionString ) then
+  if not Ping( Query.Connection.Params.Values['server'] ) then
     raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.ConnectionString );
 
   try
@@ -207,7 +207,7 @@ function TSqlQuery.Open(var query: TFDQuery): TSqlQuery;
 var
   Executed : Boolean;
 begin
-  if not Ping( Query.Connection.ConnectionString ) then
+  if not Ping( Query.Connection.Params.Values['server'] ) then
     raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.ConnectionString );
 
   try
