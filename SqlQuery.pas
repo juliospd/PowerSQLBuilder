@@ -56,15 +56,23 @@ type
     function Open(var query : TZQuery ) : TSqlQuery; overload;
     function Open(var query : TFDQuery ) : TSqlQuery; overload;
 
-    function GetI( NameField : WideString ) : Integer; overload;
-    function GetL( NameField : WideString ) : Int64; overload;
-    function GetW( NameField : WideString ) : WideString; overload;
-    function GetA( NameField : WideString ) : AnsiString; overload;
-    function GetF( NameField : WideString ) : Double; overload;
-    function GetC( NameField : WideString ) : Currency; overload;
-    function GetB( NameField : WideString ) : Boolean; overload;
-    function GetD( NameField : WideString ) : TDateTime; overload;
-    function GetS( NameField : WideString ) : TMemoryStream; overload;
+    function getInteger( NameField : WideString ) : Integer; overload;
+    function getLongInt( NameField : WideString ) : Int64; overload;
+    function getWideString( NameField : WideString ) : WideString; overload;
+    function getAnsiString( NameField : WideString ) : AnsiString; overload;
+    function getFloat( NameField : WideString ) : Double; overload;
+    function getCurrency( NameField : WideString ) : Currency; overload;
+    function getBoolean( NameField : WideString ) : Boolean; overload;
+    function getDateTime( NameField : WideString ) : TDateTime; overload;
+    function getMemoryStream( NameField : WideString ) : TMemoryStream; overload;
+
+    function IntToString( NameField : WideString ) : WideString;
+    function IntToStringZero( NameField : WideString; Size : Integer ) : WideString;
+    function LongToString( NameField : WideString ) : WideString;
+    function LongToStringZero( NameField : WideString; Size : Integer ) : WideString;
+    function DateToString( NameField : WideString; Format : WideString = 'yyyy.mm.dd hh:nn:ss' ) : WideString;
+    function FloatToString( NameField : WideString; Format : WideString = '#0.00' ) : WideString;
+    function CurrencyToString( NameField : WideString; Format : WideString = '#0.00' ) : WideString;
   end;
 
 function Ping(const AHost : string) : Boolean;
@@ -159,6 +167,30 @@ begin
   end;
 end;
 
+function TSQLQuery.CurrencyToString(NameField, Format: WideString): WideString;
+begin
+  if Length(Trim(Format)) = 0  then
+    Format := '#0.00';
+
+  Result := FormatCurr( Format, getCurrency( NameField ) );
+end;
+
+function TSQLQuery.DateToString(NameField, Format: WideString): WideString;
+begin
+  if Length(Trim(Format)) = 0  then
+    Format := 'yyyy.mm.dd hh:nn:ss';
+
+  Result := FormatDateTime( Format, getDateTime(NameField) );
+end;
+
+function TSQLQuery.FloatToString(NameField, Format: WideString): WideString;
+begin
+  if Length(Trim(Format)) = 0  then
+    Format := '#0.00';
+
+  Result := FormatFloat( Format, getCurrency( NameField ) );
+end;
+
 function TSqlQuery.Execute(var Query: TFDQuery): TSqlQuery;
 var
   Executed : Boolean;
@@ -220,7 +252,7 @@ begin
         Query.SQL.Add( GetString );
         Query.Open;
 
-        Self.FDataSet := Query.DataSource.DataSet;
+        Self.FDataSet := Query.Fields.DataSet;
 
         Executed := True;
       except
@@ -255,48 +287,74 @@ begin
   FFieldBytea := Value;
 end;
 
-function TSQLQuery.GetI(NameField: WideString): Integer;
+function TSQLQuery.getInteger(NameField: WideString): Integer;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsInteger;
 end;
 
-function TSQLQuery.GetW(NameField: WideString): WideString;
+function TSQLQuery.getWideString(NameField: WideString): WideString;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsWideString;
 end;
 
-function TSQLQuery.GetF(NameField: WideString): Double;
+function TSQLQuery.IntToString(NameField: WideString): WideString;
+begin
+  Result := IntToStr( getInteger( NameField ) );
+end;
+
+function TSQLQuery.IntToStringZero(NameField: WideString; Size: Integer): WideString;
+begin
+  if Size > 0 then
+    Result := Format( '%.' + IntToStr(Size) + 'd', [getInteger(NameField)])
+  else
+    Result := IntToStr( getInteger(NameField) );
+end;
+
+function TSQLQuery.LongToString(NameField: WideString): WideString;
+begin
+  Result := IntToStr( getInteger( NameField ) );
+end;
+
+function TSQLQuery.LongToStringZero(NameField: WideString; Size: Integer): WideString;
+begin
+  if Size > 0 then
+    Result := Format( '%.' + IntToStr(Size) + 'd', [getLongInt(NameField)])
+  else
+    Result := IntToStr( getLongInt(NameField) );
+end;
+
+function TSQLQuery.getFloat(NameField: WideString): Double;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsFloat;
 end;
 
-function TSQLQuery.GetL(NameField: WideString): Int64;
+function TSQLQuery.getLongInt(NameField: WideString): Int64;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsLargeInt;
 end;
 
-function TSQLQuery.GetS(NameField: WideString): TMemoryStream;
+function TSQLQuery.getMemoryStream(NameField: WideString): TMemoryStream;
 begin
   Result := TMemoryStream.Create;
   TBlobField( Self.FDataSet.FieldByName( NameField )).SaveToStream( Result );
 end;
 
-function TSQLQuery.GetB(NameField: WideString): Boolean;
+function TSQLQuery.getBoolean(NameField: WideString): Boolean;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsBoolean;
 end;
 
-function TSQLQuery.GetD(NameField: WideString): TDateTime;
+function TSQLQuery.getDateTime(NameField: WideString): TDateTime;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsDateTime;
 end;
 
-function TSQLQuery.GetA(NameField: WideString): AnsiString;
+function TSQLQuery.getAnsiString(NameField: WideString): AnsiString;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsAnsiString;
 end;
 
-function TSQLQuery.GetC(NameField: WideString): Currency;
+function TSQLQuery.getCurrency(NameField: WideString): Currency;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsCurrency;
 end;
