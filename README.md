@@ -1,5 +1,5 @@
 # PowerSQLBuilder
-PowerSQLBuilder - Delphi single units with 3 class TPowerSQLBuilder, TDataSQLBuilder and TSQLQuery.
+PowerSQLBuilder - Delphi single units with 2 class TPowerSQLBuilder and TSQLQuery.
 
 O objetivo destas 2 unidades que trabalham em conjunto é simplificar a vida do programador que gera muitos códigos de 
 scripts SQL na mão e não quer ficar preso a componentes de terceiros ou até mesmo componente DBWare do Delphi.
