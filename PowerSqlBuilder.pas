@@ -36,11 +36,13 @@ type
     FPostGreSQL: Boolean;
     procedure SetPostGreSQL(const Value: Boolean);
   public
+    // Trabalhando com PostGreSQl ou MySQL ( Testado apenas nestes 2 banco de dados ).
     property PostGreSQL : Boolean read FPostGreSQL write SetPostGreSQL;
     // StringBuilder Padrão
     function Add(const Value : WideString) : TPowerSQLBuilder; virtual;
     function AddQuoted(const Value : WideString) : TPowerSQLBuilder; virtual;
     function AddLine(const Value : WideString) : TPowerSQLBuilder; virtual;
+    // Teste de Igualdade ( = ) usado apos acondição where.
     function Equal( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
@@ -50,6 +52,17 @@ type
     function Equal( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function EqualOfDate( const Value : TDateTime ) : TPowerSQLBuilder; virtual;
     function EqualOfTime( const Value : TDateTime; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
+    // Teste de Diferença ( <> ) ou outras combinação (>=, <=) usado apos acondição where.
+    function Match( const Value : WideString; Blend : WideString = '<>' ) : TPowerSQLBuilder; overload; virtual;
+    function Match( const Value : Double; DecimalValue : ShortInt = 2; Blend : WideString = '<>' ) : TPowerSQLBuilder; overload; virtual;
+    function Match( const Value : Currency; DecimalValue : ShortInt = 2; Blend : WideString = '<>' ) : TPowerSQLBuilder; overload; virtual;
+    function Match( const Value : TDateTime; Blend : WideString = '<>' ) : TPowerSQLBuilder; overload; virtual;
+    function Match( const Value : Int64; Blend : WideString = '<>' ) : TPowerSQLBuilder; overload; virtual;
+    function Match( const Value : Integer; Blend : WideString = '<>' ) : TPowerSQLBuilder; overload; virtual;
+    function Match( const Value : Boolean; Blend : WideString = '<>' ) : TPowerSQLBuilder; overload; virtual;
+    function MatchOfDate( const Value : TDateTime; Blend : WideString = '<>' ) : TPowerSQLBuilder; virtual;
+    function MatchOfTime( const Value : TDateTime; Seconds : Boolean = True; Blend : WideString = '<>' ) : TPowerSQLBuilder; virtual;
+    // Field usado na inserção
     function Field( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
@@ -59,6 +72,7 @@ type
     function Field( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function FieldOfDate( const Value : TDateTime ) : TPowerSQLBuilder; virtual;
     function FieldOfTime( const Value : TDateTime; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
+    // Campo e valor usado no Update
     function UpField( Field : WideString; const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
@@ -68,6 +82,7 @@ type
     function UpField( Field : WideString; const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function UpFieldOfDate( Field : WideString; const Value : TDateTime ) : TPowerSQLBuilder; virtual;
     function UpFieldOfTime( Field : WideString; const Value : TDateTime; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
+    // Outras Funções
     function Clear : TPowerSQLBuilder; virtual;
     function GetString : WideString; virtual;
     // Power SQL
@@ -109,14 +124,14 @@ type
     function Min(const Value : WideString ) : TPowerSQLBuilder; Virtual;
     //
     function &As( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &NOT( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &OR( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &AND( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &ON( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &IN : TPowerSQLBuilder;  overload; virtual;
-    function &IN( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function &NOT_IN : TPowerSQLBuilder; overload; virtual;
-    function &NOT_IN(const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &Not( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &Or( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &And( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &On( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &In : TPowerSQLBuilder;  overload; virtual;
+    function &In( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &Not_In : TPowerSQLBuilder; overload; virtual;
+    function &Not_In(const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
 
     constructor Create;
     destructor Destroy; override;
@@ -532,6 +547,116 @@ end;
 function TPowerSQLBuilder.Limit(const Value: Integer): TPowerSQLBuilder;
 begin
   Result := Add(' limit ').Field(Value);
+end;
+
+function TPowerSQLBuilder.Match(const Value: Currency; DecimalValue: ShortInt; Blend: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' ').Add( Blend ).Add(' ').Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
+end;
+
+function TPowerSQLBuilder.Match(const Value: TDateTime; Blend: WideString): TPowerSQLBuilder;
+begin
+  if Self.FPostGreSQL then
+  begin
+    if DateOf(Value) = 0 then
+      Add(' ').Add( Blend ).Add(' null ')
+    else
+      Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( FormatDateTime( 'yyyy.mm.dd hh:nn:ss', Value ) ) );
+  end
+  else
+  begin
+    if DateOf(Value) = 0 then
+      Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( '0000.00.00 00:00:00' ) )
+    else
+      Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( FormatDateTime( 'yyyy.mm.dd hh:nn:ss', Value ) ) );
+  end;
+
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.Match(const Value: WideString; Blend: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' ').Add( Blend ).Add(' ').AddQuoted(Value);
+end;
+
+function TPowerSQLBuilder.Match(const Value: Double; DecimalValue: ShortInt; Blend: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' ').Add( Blend ).Add(' ').Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
+end;
+
+function TPowerSQLBuilder.Match(const Value: Boolean; Blend: WideString): TPowerSQLBuilder;
+begin
+  if Self.FPostGreSQL then
+    Add(' ').Add( Blend ).Add(' ').Add( IfThen(Value, 'true', 'false') )
+  else
+    Add(' ').Add( Blend ).Add(' ').Add( IfThen(Value, '1', '0') );
+
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.Match(const Value: Integer; Blend: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' ').Add( Blend ).Add(' ').Add( IntToStr( Value ) );
+end;
+
+function TPowerSQLBuilder.Match(const Value: Int64; Blend: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' ').Add( Blend ).Add(' ').Add( IntToStr( Value ) );
+end;
+
+function TPowerSQLBuilder.MatchOfDate(const Value: TDateTime; Blend: WideString): TPowerSQLBuilder;
+begin
+  if Self.FPostGreSQL then
+  begin
+    if DateOf(Value) = 0 then
+      Add(' ').Add( Blend ).Add(' ').Add('null ')
+    else
+      Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( FormatDateTime( 'yyyy.mm.dd', Value ) ) );
+  end
+  else
+  begin
+    if DateOf(Value) = 0 then
+      Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( '0000.00.00' ) )
+    else
+      Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( FormatDateTime( 'yyyy.mm.dd', Value ) ) );
+  end;
+
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.MatchOfTime(const Value: TDateTime; Seconds: Boolean; Blend: WideString): TPowerSQLBuilder;
+begin
+  if Self.FPostGreSQL then
+  begin
+    if DateOf(Value) = 0 then
+      Add(' ').Add( Blend ).Add(' ').Add('null ')
+    else
+    begin
+      if Seconds then
+        Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( FormatDateTime( 'hh:mm.ss', Value ) ) )
+      else
+        Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( FormatDateTime( 'hh:mm', Value ) ) )
+    end;
+  end
+  else
+  begin
+    if DateOf(Value) = 0 then
+    begin
+      if Seconds then
+        Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( '00:00:00' ) )
+      else
+        Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( '00:00' ) )
+    end
+    else
+    begin
+      if Seconds then
+        Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( FormatDateTime( 'hh:mm:ss', Value ) ) )
+      else
+        Add(' ').Add( Blend ).Add(' ').Add( QuotedStr( FormatDateTime( 'hh:mm', Value ) ) );
+    end;
+  end;
+
+  Result := Self;
 end;
 
 function TPowerSQLBuilder.Max(const Value: WideString): TPowerSQLBuilder;
