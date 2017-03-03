@@ -72,6 +72,8 @@ type
     function LongToStringZero( NameField : WideString; Size : Integer ) : WideString;
     function DateToString( NameField : WideString; Format : WideString = 'yyyy.mm.dd hh:nn:ss' ) : WideString;
     function FloatToString( NameField : WideString; Format : WideString = '#0.00' ) : WideString;
+    function StringToInt( NameField : WideString ) : Integer;
+    function StringToLog( NameField : WideString ) : Int64;
     function CurrencyToString( NameField : WideString; Format : WideString = '#0.00' ) : WideString;
   end;
 
@@ -155,6 +157,7 @@ begin
           end
           else
           begin
+            Executed := True;
             raise;
           end;
         end;
@@ -285,6 +288,16 @@ end;
 procedure TSQLQuery.SetFieldBytea(const Value: TMemoryStream);
 begin
   FFieldBytea := Value;
+end;
+
+function TSQLQuery.StringToInt(NameField: WideString): Integer;
+begin
+  Result := StrToIntDef(Self.FDataSet.FieldByName(NameField).AsWideString,0);
+end;
+
+function TSQLQuery.StringToLog(NameField: WideString): Int64;
+begin
+  Result := StrToInt64Def(FDataSet.FieldByName(NameField).AsWideString, 0);
 end;
 
 function TSQLQuery.getInteger(NameField: WideString): Integer;
