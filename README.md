@@ -1,20 +1,26 @@
 # PowerSQLBuilder
-PowerSQLBuilder - Delphi single units with 2 class TPowerSQLBuilder and TSQLQuery.
 
-O objetivo destas 2 unidades que trabalham em conjunto é simplificar a vida do programador que gera muitos códigos de 
-scripts SQL na mão e não quer ficar preso a componentes de terceiros ou até mesmo componente DBWare do Delphi.
+PowerSQLBuilder é uma classe de manipulação SQL
+
+Chega de ficar concatenando pedaços do texto gerando um scripts SQL manual
+E muita das vezes falho, através do PowerSQLBuilder você apenas chama os
+comandos SQL que ele mesmo interpreta e gera o scripts SQL automaticamente.
+  
+   Mais o que torna ele ágil é a possibilidade de passar parâmetros sem se preocupar
+   com seu tipo de origem o PowerSQLBulder faz isso automaticamente para você.
+   interpleta e gera o scripts SQL automaticamente
+
+PowerSQLBuilder - Delphi single units with 2 class TPowerSQLBuilder and TSQLQuery.
 
 Exemplo de um Select :
 
-  SQL.Select('a.nome, b.grupo').From('animal a').LeftJoin('grupo b').&ON('b.id = a.id_grupo').OrderBy('nome');
+  SQL.SelectFrom('pessoa').where('idade').MajorEqual(18).&And('nome').like('Maria');
   
 Mais as maiores vantagens são os comandos Insert e UPDate.
 
-Exemplo de um Insert :
-  Tipos dos campos 
-    WideString, Double, TDateTime e Boolean.
+Exemplo de um Insert : Tipos dos campos  "Integer, Int64, WideString, Double, Currency, TDateTime e Boolean".
 
-  SQL.Insert('clientes').Fields('nome, endereco, bairro, cep, estado, telefone, salario, data_nascimento, dependentes').Values;
+  SQL.Insert('clientes').Fields( Model.Fields ).Values;
   SQL.Field( Model.Nome ).Next;  
   SQL.Field( Model.Endereco ).Next;
   SQL.Field( Model.Bairro ).Next;
@@ -27,4 +33,3 @@ Exemplo de um Insert :
 Exemplo de um Update :
   
   SQL.Update('clientes').UpField('nome', Model.Nome ).Where('id').Equal( Model.ID );
-  
