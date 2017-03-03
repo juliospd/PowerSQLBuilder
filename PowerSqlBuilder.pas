@@ -30,20 +30,35 @@ uses
   System.SysUtils, System.Classes, System.StrUtils, System.DateUtils;
 
 type
+  /// <summary>
+  ///   PowerSQLBuilder é uma classe de manipulação SQL
+  /// </summary>
+  /// <comments>
+  ///   Chega de ficar concatenando pedaços do texto gerando um scripts SQL manual
+  ///   E muita das vezes falho, através do PowerSQLBuilder você apenas chama os
+  ///   comandos SQL que ele mesmo interpreta e gera o scripts SQL automaticamente
+  ///   <para><c>Mais o que torna ele ágil é a possibilidade de passar parâmetros sem se preocupar
+  ///   com seu tipo de origem o PowerSQLBulder faz isso automaticamente para você.
+  ///   interpleta e gera o scripts SQL automaticamente</c></para>
+  /// </comments>
+  /// <remarks>
+  ///   Para saber mais entre no site https://github.com/juliospd/PowerSQLBuilder
+  /// </remarks>
   TPowerSQLBuilder = class(TObject)
   private
     FValuePSB : WideString;
     FPostGreSQL: Boolean;
+    FWhere : Boolean;
 
-    function Test( const Value : WideString; Condition : WideString ) : TPowerSQLBuilder; overload;
-    function Test( const Value : Double; DecimalValue : ShortInt = 2; Condition : WideString = '' ) : TPowerSQLBuilder; overload;
-    function Test( const Value : Currency; DecimalValue : ShortInt = 2; Condition : WideString = '' ) : TPowerSQLBuilder; overload;
-    function Test( const Value : TDateTime; Condition : WideString ) : TPowerSQLBuilder; overload;
-    function Test( const Value : Int64; Condition : WideString ) : TPowerSQLBuilder; overload;
-    function Test( const Value : Integer; Condition : WideString ) : TPowerSQLBuilder; overload;
-    function Test( const Value : Boolean; Condition : WideString ) : TPowerSQLBuilder; overload;
-    function TestOfDate( const Value : TDateTime; Condition : WideString ) : TPowerSQLBuilder;
-    function TestOfTime( const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = '' ) : TPowerSQLBuilder;
+    function Test( const Value : WideString; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : Double; DecimalValue : ShortInt = 2; Condition : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : Currency; DecimalValue : ShortInt = 2; Condition : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : TDateTime; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : Int64; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : Integer; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : Boolean; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function TestOfDate( const Value : TDateTime; Condition : WideString ) : TPowerSQLBuilder; virtual;
+    function TestOfTime( const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = '' ) : TPowerSQLBuilder; virtual;
 
     procedure SetPostGreSQL(const Value: Boolean);
   public
@@ -54,14 +69,41 @@ type
     function AddQuoted(const Value : WideString) : TPowerSQLBuilder; virtual;
     function AddLine(const Value : WideString) : TPowerSQLBuilder; virtual;
     // Teste de Igualdade ( = ) usado apos acondição where.
+    /// <summary>
+    ///   Equal : Efetua o teste de Igualdade A = B do tipo WideString
+    /// </summary>
     function Equal( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    /// <summary>
+    ///   Equal : Efetua o teste de Igualdade A = B do tipo Double
+    /// </summary>
     function Equal( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
+    /// <summary>
+    ///   Equal : Efetua o teste de Igualdade A = B do tipo Currency
+    /// </summary>
     function Equal( const Value : Currency; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
+    /// <summary>
+    ///   Equal : Efetua o teste de Igualdade A = B do tipo TDateTime
+    /// </summary>
     function Equal( const Value : TDateTime ) : TPowerSQLBuilder; overload; virtual;
+    /// <summary>
+    ///   Equal : Efetua o teste de Igualdade A = B do tipo Int64
+    /// </summary>
     function Equal( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
+    /// <summary>
+    ///   Equal : Efetua o teste de Igualdade A = B do tipo Integer
+    /// </summary>
     function Equal( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
+    /// <summary>
+    ///   Equal : Efetua o teste de Igualdade A = B do tipo Boolean
+    /// </summary>
     function Equal( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
+    /// <summary>
+    ///   Equal : Efetua o teste de Igualdade A = B do tipo TDateTime extraindo apenas a Data
+    /// </summary>
     function EqualOfDate( const Value : TDateTime ) : TPowerSQLBuilder; virtual;
+    /// <summary>
+    ///   Equal : Efetua o teste de Igualdade A = B do tipo TDateTime extraindo apenas a Hora
+    /// </summary>
     function EqualOfTime( const Value : TDateTime; Seconds : Boolean = True ) : TPowerSQLBuilder; virtual;
     // Teste de Diferença ( > ) usado apos acondição where.
     function Major( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
@@ -140,7 +182,8 @@ type
     function Insert( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Select : TPowerSQLBuilder; overload; virtual;
     function Select( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function SelectFrom( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function SelectFrom : TPowerSQLBuilder; overload; virtual;
+    function SelectFrom( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Update( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Delete( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function DeleteFrom( const Value : WideString ) : TPowerSQLBuilder; virtual;
@@ -153,11 +196,22 @@ type
     function Group_By( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Values : TPowerSQLBuilder; virtual;
     function EndValues : TPowerSQLBuilder; virtual;
+    function Sum( const Value : WideString ) : TPowerSQLBuilder;  virtual;
+    function SumAs( const Value : WideString; asValue : WideString ) : TPowerSQLBuilder; virtual;
+    /// <summary>
+    ///   sP : Abre um Parentese Start Parent '('
+    /// </summary>
+    function sP : TPowerSQLBuilder; virtual;
+    /// <summary>
+    ///   eP : Fecha um Parentese end parent ')'
+    /// </summary>
+    function eP : TPowerSQLBuilder; virtual;
     function LeftJoin( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function RightJoin( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function InnerJoin( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function FullJoin( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function Limit( const Value : Integer ) : TPowerSQLBuilder; virtual;
+    function Limit( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
+    function Limit( const pag1, pag2 : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Like( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Next : TPowerSQLBuilder; virtual;
     function Fields( const Value : WideString ) : TPowerSQLBuilder; virtual;
@@ -172,8 +226,12 @@ type
     function Distinct : TPowerSQLBuilder; overload; virtual;
     function Distinct( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Count : TPowerSQLBuilder; virtual;
+    function CountAs( const asValue : WideString ) : TPowerSQLBuilder; virtual;
     function Max(const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Min(const Value : WideString ) : TPowerSQLBuilder; Virtual;
+    function AlterTable(const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function AutoIncrement(const Value : Integer ) : TPowerSQLBuilder; virtual;
+    function EndIn : TPowerSQLBuilder; virtual;
     //
     function &As( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &Not( const Value : WideString ) : TPowerSQLBuilder; virtual;
@@ -185,7 +243,7 @@ type
     function &Not_In : TPowerSQLBuilder; overload; virtual;
     function &Not_In(const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
 
-    constructor Create;
+    constructor Create; virtual;
     destructor Destroy; override;
   end;
 
@@ -218,6 +276,11 @@ begin
   Result := Add(' as ').Add( Value );
 end;
 
+function TPowerSQLBuilder.AutoIncrement(const Value: Integer): TPowerSQLBuilder;
+begin
+  Result := Add(' auto_increment ').Equal( Value );
+end;
+
 function TPowerSQLBuilder.Add(const Value: WideString): TPowerSQLBuilder;
 begin
   System.Insert(Value, Self.FValuePSB, Length(Self.FValuePSB)+1);
@@ -232,6 +295,11 @@ end;
 function TPowerSQLBuilder.AddQuoted( const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add( QuotedStr( Value ) );
+end;
+
+function TPowerSQLBuilder.AlterTable(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' alter table ').Add( value );
 end;
 
 function TPowerSQLBuilder.BetWeen(const ValueStart, ValueEnd: Double; DecimalValue: ShortInt): TPowerSQLBuilder;
@@ -277,7 +345,13 @@ end;
 function TPowerSQLBuilder.Clear: TPowerSQLBuilder;
 begin
   Self.FValuePSB := '';
+  Self.FWhere := False;
   Result := Self;
+end;
+
+function TPowerSQLBuilder.CountAs(const asValue: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' count(*) as ').Add( asValue );
 end;
 
 function TPowerSQLBuilder.Count: TPowerSQLBuilder;
@@ -376,7 +450,17 @@ begin
   Result := Test( Value, '=' );
 end;
 
+function TPowerSQLBuilder.EndIn: TPowerSQLBuilder;
+begin
+  Result := eP;
+end;
+
 function TPowerSQLBuilder.EndValues: TPowerSQLBuilder;
+begin
+  Result := eP;
+end;
+
+function TPowerSQLBuilder.eP: TPowerSQLBuilder;
 begin
   Result := Add(')');
 end;
@@ -528,7 +612,12 @@ end;
 
 function TPowerSQLBuilder.&AND( const Value : WideString ) : TPowerSQLBuilder;
 begin
-  Result := Add(' and ').Add( Value );
+  if not Self.FWhere then
+  begin
+    Result := Add(' where ').Add( Value );
+    Self.FWhere := True;
+  end
+  else Result := Add(' and ').Add( Value );
 end;
 
 function TPowerSQLBuilder.Delete( const Value : WideString ) : TPowerSQLBuilder;
@@ -574,6 +663,11 @@ end;
 function TPowerSQLBuilder.Like(const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' like ').AddQuoted( Trim(Value) + '%' );
+end;
+
+function TPowerSQLBuilder.Limit(const pag1, pag2: Integer): TPowerSQLBuilder;
+begin
+  Result := Add(' limit ').Field(pag1).Add(', ').Field(pag2);
 end;
 
 function TPowerSQLBuilder.Limit(const Value: Integer): TPowerSQLBuilder;
@@ -811,6 +905,11 @@ begin
   Result := Add('select ').Add( Value );
 end;
 
+function TPowerSQLBuilder.SelectFrom: TPowerSQLBuilder;
+begin
+  Result := Add('select * from ');
+end;
+
 function TPowerSQLBuilder.Select: TPowerSQLBuilder;
 begin
   Result := Add('select ');
@@ -824,6 +923,21 @@ end;
 procedure TPowerSQLBuilder.SetPostGreSQL(const Value: Boolean);
 begin
   FPostGreSQL := Value;
+end;
+
+function TPowerSQLBuilder.sP: TPowerSQLBuilder;
+begin
+  Result := Add('(')
+end;
+
+function TPowerSQLBuilder.Sum(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' sum(').Add(Value).Add(')');
+end;
+
+function TPowerSQLBuilder.SumAs(const Value: WideString; asValue: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' sum(').Add(Value).Add(') as ').Add( asValue );
 end;
 
 function TPowerSQLBuilder.Test(const Value: Int64;Condition: WideString): TPowerSQLBuilder;
@@ -873,7 +987,10 @@ end;
 
 function TPowerSQLBuilder.Test(const Value: WideString;Condition: WideString): TPowerSQLBuilder;
 begin
-  Result := Add(' ').Add( Condition ).Add(' ').AddQuoted(Value);
+  if UpperCase(Value) = 'NULL' then
+    Result := Add(' ').Add( Condition ).Add(' ').Add(Value)
+  else
+    Result := Add(' ').Add( Condition ).Add(' ').AddQuoted(Value);
 end;
 
 function TPowerSQLBuilder.Test(const Value: Double; DecimalValue: ShortInt;Condition: WideString): TPowerSQLBuilder;
@@ -994,11 +1111,13 @@ end;
 function TPowerSQLBuilder.Where(const Value, Cast: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' where ').Cast( Value, Cast );
+  Self.FWhere := True;
 end;
 
 function TPowerSQLBuilder.Where( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add(' where ').Add( Value );
+  Self.FWhere := True;
 end;
 
 end.
