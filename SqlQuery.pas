@@ -48,14 +48,37 @@ type
     procedure SetFieldBytea(const Value: TMemoryStream);
     procedure SetDataSet(const Value: TDataSet);
   public
-    property DataSet : TDataSet read FDataSet write SetDataSet;
     property FieldBytea : TMemoryStream read FFieldBytea write SetFieldBytea;
+    property DataSet : TDataSet read FDataSet write SetDataSet;
 
     function Execute(var Query : TZQuery ) : TSqlQuery; overload;
     function Execute(var Query : TFDQuery ) : TSqlQuery; overload;
     function Open(var query : TZQuery ) : TSqlQuery; overload;
     function Open(var query : TFDQuery ) : TSqlQuery; overload;
 
+    // Atalhos do DataSet
+    function RecordCount : Integer;
+    function RecNo : Integer;
+    function Eof : Boolean;
+    function Bof : Boolean;
+    function Active : Boolean;
+    function SetField( Field : WideString; Value : WideString ) : TSQLQuery; overload; virtual;
+    function SetField( Field : WideString; Value : Double ) : TSQLQuery; overload; virtual;
+    function SetField( Field : WideString; Value : Currency) : TSQLQuery; overload; virtual;
+    function SetField( Field : WideString; Value : TDateTime ) : TSQLQuery; overload; virtual;
+    function SetField( Field : WideString; Value : Int64 ) : TSQLQuery; overload; virtual;
+    function SetField( Field : WideString; Value : Integer ) : TSQLQuery; overload; virtual;
+    function SetField( Field : WideString; Value : Boolean ) : TSQLQuery; overload; virtual;
+    //
+    function First : TSQLQuery; virtual;
+    function Prior : TSQLQuery; virtual;
+    function NextRecord : TSQLQuery; virtual;
+    function Last: TSQLQuery; virtual;
+    //
+    function Append : TSQLQuery; virtual;
+    function Edit : TSQLQuery; virtual;
+    function Post : TSQLQuery; virtual;
+    //
     function getInteger( NameField : WideString ) : Integer; overload;
     function getLongInt( NameField : WideString ) : Int64; overload;
     function getWideString( NameField : WideString ) : WideString; overload;
@@ -157,7 +180,6 @@ begin
           end
           else
           begin
-            Executed := True;
             raise;
           end;
         end;
@@ -168,6 +190,38 @@ begin
     Clear;
     Result := Self;
   end;
+end;
+
+function TSQLQuery.Active: Boolean;
+begin
+  Result := False;
+
+  if Assigned( Self.FDataSet ) then
+    Result := Self.FDataSet.Active;
+end;
+
+function TSQLQuery.Append : TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.Append;
+
+  Result := Self;
+end;
+
+function TSQLQuery.BOF: Boolean;
+begin
+  Result := False;
+
+  if Active then
+    Result := Self.FDataSet.Bof;
+end;
+
+function TSQLQuery.RecordCount: Integer;
+begin
+  Result := 0;
+
+  if Active then
+    Result := Self.FDataSet.RecordCount;
 end;
 
 function TSQLQuery.CurrencyToString(NameField, Format: WideString): WideString;
@@ -186,12 +240,36 @@ begin
   Result := FormatDateTime( Format, getDateTime(NameField) );
 end;
 
+function TSQLQuery.First : TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.First;
+
+  Result := Self;
+end;
+
 function TSQLQuery.FloatToString(NameField, Format: WideString): WideString;
 begin
   if Length(Trim(Format)) = 0  then
     Format := '#0.00';
 
   Result := FormatFloat( Format, getCurrency( NameField ) );
+end;
+
+function TSQLQuery.Edit : TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.Edit;
+
+  Result := Self;
+end;
+
+function TSQLQuery.EOF: Boolean;
+begin
+  Result := False;
+
+  if Active then
+    Result := Self.FDataSet.Eof;
 end;
 
 function TSqlQuery.Execute(var Query: TFDQuery): TSqlQuery;
@@ -280,9 +358,89 @@ begin
   end;
 end;
 
+function TSQLQuery.Post : TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.Post;
+
+  Result := Self;
+end;
+
+function TSQLQuery.Prior : TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.Prior;
+
+  Result := Self;
+end;
+
+function TSQLQuery.RecNo: Integer;
+begin
+  Result := 0;
+
+  if Active then
+    Result := Self.FDataSet.RecNo;
+end;
+
+function TSQLQuery.SetField(Field: WideString; Value: Double): TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.FieldByName( Field ).AsFloat := Value;
+
+  Result := Self;
+end;
+
+function TSQLQuery.SetField(Field, Value: WideString): TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.FieldByName( Field ).AsWideString := Value;
+
+  Result := Self;
+end;
+
+function TSQLQuery.SetField(Field: WideString; Value: Integer): TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.FieldByName( Field ).AsInteger := Value;
+
+  Result := Self;
+end;
+
 procedure TSQLQuery.SetDataSet(const Value: TDataSet);
 begin
   FDataSet := Value;
+end;
+
+function TSQLQuery.SetField(Field: WideString; Value: Boolean): TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.FieldByName( Field ).AsBoolean := Value;
+
+  Result := Self;
+end;
+
+function TSQLQuery.SetField(Field: WideString; Value: Int64): TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.FieldByName( Field ).AsLargeInt := Value;
+
+  Result := Self;
+end;
+
+function TSQLQuery.SetField(Field: WideString; Value: Currency): TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.FieldByName( Field ).AsCurrency := Value;
+
+  Result := Self;
+end;
+
+function TSQLQuery.SetField(Field: WideString; Value: TDateTime): TSQLQuery;
+begin
+  if Active then
+    Self.FDataSet.FieldByName( Field ).AsDateTime := Value;
+
+  Result := Self;
 end;
 
 procedure TSQLQuery.SetFieldBytea(const Value: TMemoryStream);
@@ -323,6 +481,14 @@ begin
     Result := IntToStr( getInteger(NameField) );
 end;
 
+function TSQLQuery.Last : TSQLQuery;
+begin
+  if Assigned( Self.FDataSet ) then
+    Self.FDataSet.Last;
+
+  Result := Self;
+end;
+
 function TSQLQuery.LongToString(NameField: WideString): WideString;
 begin
   Result := IntToStr( getInteger( NameField ) );
@@ -334,6 +500,14 @@ begin
     Result := Format( '%.' + IntToStr(Size) + 'd', [getLongInt(NameField)])
   else
     Result := IntToStr( getLongInt(NameField) );
+end;
+
+function TSQLQuery.NextRecord : TSQLQuery;
+begin
+  if Assigned( Self.FDataSet ) then
+    Self.FDataSet.Next;
+
+  Result := Self;
 end;
 
 function TSQLQuery.getFloat(NameField: WideString): Double;
