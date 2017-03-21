@@ -12,4 +12,7 @@ comandos SQL que ele mesmo interpreta e gera o scripts SQL automaticamente.
 
 PowerSQLBuilder - Delphi single units with 2 class TPowerSQLBuilder and TSQLQuery.
 
-Unidade simples de Exemplo : Teste.dpr
+Unidade simples de Exemplo : 
+
+Teste.dpr 
+# Apenas de ilustração para demonstrar como aplicar o PowerSQLBuilder no seu dia a dia.
