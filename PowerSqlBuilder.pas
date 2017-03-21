@@ -46,7 +46,7 @@ type
   /// </remarks>
   TPowerSQLBuilder = class(TObject)
   private
-    FValuePSB : WideString;
+    FValuePSB : TStringBuilder;
     FPostGreSQL: Boolean;
     FWhere : Boolean;
 
@@ -283,7 +283,7 @@ end;
 
 function TPowerSQLBuilder.Add(const Value: WideString): TPowerSQLBuilder;
 begin
-  System.Insert(Value, Self.FValuePSB, Length(Self.FValuePSB)+1);
+  Self.FValuePSB.Append( Value );
   Result := Self;
 end;
 
@@ -344,7 +344,7 @@ end;
 
 function TPowerSQLBuilder.Clear: TPowerSQLBuilder;
 begin
-  Self.FValuePSB := '';
+  Self.FValuePSB.Clear;
   Self.FWhere := False;
   Result := Self;
 end;
@@ -361,7 +361,7 @@ end;
 
 constructor TPowerSQLBuilder.Create;
 begin
-  Self.FValuePSB := '';
+  Self.FValuePSB := TStringBuilder.Create;
 end;
 
 function TPowerSQLBuilder.Desc: TPowerSQLBuilder;
@@ -371,7 +371,7 @@ end;
 
 destructor TPowerSQLBuilder.Destroy;
 begin
-  Self.FValuePSB := '';
+  FreeAndNil( Self.FValuePSB );
   inherited;
 end;
 
@@ -607,7 +607,7 @@ end;
 
 function TPowerSQLBuilder.GetString: WideString;
 begin
-  Result := Self.FValuePSB;
+  Result := Self.FValuePSB.ToString;
 end;
 
 function TPowerSQLBuilder.&AND( const Value : WideString ) : TPowerSQLBuilder;
