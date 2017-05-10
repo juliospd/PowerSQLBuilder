@@ -158,7 +158,8 @@ type
     function Update( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Delete( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function DeleteFrom( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function From( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function From( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function From : TPowerSQLBuilder; overload; virtual;
     function Where( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Where( const Value : WideString; const Cast : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Order_By : TPowerSQLBuilder; overload; virtual;
@@ -169,14 +170,22 @@ type
     function EndValues : TPowerSQLBuilder; virtual;
     function Sum( const Value : WideString ) : TPowerSQLBuilder;  virtual;
     function SumAs( const Value : WideString; asValue : WideString ) : TPowerSQLBuilder; virtual;
-    ///   sP : Abre um Parentese Start Parent '('
+    /// <summary>
+    /// sP : Abre um Parentese Start Parent '('
+    /// </summary>
     function sP : TPowerSQLBuilder; virtual;
-    ///   eP : Fecha um Parentese end parent ')'
+    /// <summary>
+    /// eP : Fecha um Parentese end parent ')'
+    /// </summary>
     function eP : TPowerSQLBuilder; virtual;
-    function LeftJoin( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function RightJoin( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function InnerJoin( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function FullJoin( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function LeftJoin( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function LeftJoin : TPowerSQLBuilder; overload; virtual;
+    function RightJoin( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function RightJoin : TPowerSQLBuilder; overload; virtual;
+    function InnerJoin( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function InnerJoin : TPowerSQLBuilder; overload; virtual;
+    function FullJoin( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function FullJoin : TPowerSQLBuilder; overload; virtual;
     function Limit( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Limit( const pag1, pag2 : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Like( const Value : WideString ) : TPowerSQLBuilder; virtual;
@@ -226,6 +235,11 @@ end;
 function TPowerSQLBuilder.&IN(const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' in (').Add( Value );
+end;
+
+function TPowerSQLBuilder.InnerJoin: TPowerSQLBuilder;
+begin
+  Result := Add(' Inner Join ');
 end;
 
 function TPowerSQLBuilder.&NOT_IN(const Value: WideString): TPowerSQLBuilder;
@@ -427,6 +441,9 @@ begin
   Result := eP;
 end;
 
+/// <summary>
+///   End Parent ')'
+/// </summary>
 function TPowerSQLBuilder.eP: TPowerSQLBuilder;
 begin
   Result := Add(')');
@@ -566,6 +583,16 @@ begin
   Result := Add(' (').Add( Value ).EndValues;
 end;
 
+function TPowerSQLBuilder.From: TPowerSQLBuilder;
+begin
+  Result := Add(' from ');
+end;
+
+function TPowerSQLBuilder.FullJoin: TPowerSQLBuilder;
+begin
+  Result := Add(' full join ');
+end;
+
 function TPowerSQLBuilder.Field(const Value: WideString): TPowerSQLBuilder;
 begin
   Result := AddQuoted(Value);
@@ -629,6 +656,11 @@ end;
 function TPowerSQLBuilder.LeftJoin( const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' Left Join ').Add( Value );
+end;
+
+function TPowerSQLBuilder.LeftJoin: TPowerSQLBuilder;
+begin
+  Result := Add(' Left Join ');
 end;
 
 function TPowerSQLBuilder.Like(const Value: WideString): TPowerSQLBuilder;
@@ -866,6 +898,11 @@ begin
   Result := Add(' order by ').Add( Value );
 end;
 
+function TPowerSQLBuilder.RightJoin: TPowerSQLBuilder;
+begin
+  Result := Add(' Right Join ');
+end;
+
 function TPowerSQLBuilder.RightJoin( const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' Right Join ').Add( Value );
@@ -896,6 +933,9 @@ begin
   FPostGreSQL := Value;
 end;
 
+/// <summary>
+///   Start Parent '('
+/// </summary>
 function TPowerSQLBuilder.sP: TPowerSQLBuilder;
 begin
   Result := Add('(')
