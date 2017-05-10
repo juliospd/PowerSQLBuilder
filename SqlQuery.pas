@@ -37,19 +37,38 @@ uses
   FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Stan.Param, FireDAC.DatS,
   FireDAC.DApt.Intf,FireDAC.DApt, FireDAC.Phys.PGDef, FireDAC.VCLUI.Wait,
   FireDAC.Comp.UI, FireDAC.Phys.PG, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  System.Generics.Defaults, System.Generics.Collections,
   IdBaseComponent, IdComponent, IdRawBase, IdRawClient, IdIcmpClient;
 
 type
+  TBlobFieldsinSQL = class
+  private
+    FFieldBlob: TMemoryStream;
+    FFieldName: WideString;
+
+    procedure SetFieldBlob(const Value: TMemoryStream);
+    procedure SetFieldName(const Value: WideString);
+  public
+    property FieldName : WideString read FFieldName write SetFieldName;
+    property FieldBlob : TMemoryStream read FFieldBlob write SetFieldBlob;
+
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
   TSQLQuery = class( TPowerSQLBuilder )
   private
     FDataSet : TDataSet;
-    FFieldBytea: TMemoryStream;
+    FFieldBlob: TList<TBlobFieldsinSQL>;
 
-    procedure SetFieldBytea(const Value: TMemoryStream);
+    procedure FieldBlobClear;
+
     procedure SetDataSet(const Value: TDataSet);
   public
-    property FieldBytea : TMemoryStream read FFieldBytea write SetFieldBytea;
     property DataSet : TDataSet read FDataSet write SetDataSet;
+
+    function FieldBlob( FieldName : WideString; FieldBlob : TMemoryStream ) : TSQLQuery; virtual;
+    function UpFieldBlob( FieldName : WideString; FieldBlob : TMemoryStream ) : TSQLQuery; virtual;
 
     function Execute(var Query : TZQuery ) : TSqlQuery; overload;
     function Execute(var Query : TFDQuery ) : TSqlQuery; overload;
@@ -87,7 +106,7 @@ type
     function getCurrency( NameField : WideString ) : Currency; overload;
     function getBoolean( NameField : WideString ) : Boolean; overload;
     function getDateTime( NameField : WideString ) : TDateTime; overload;
-    function getMemoryStream( NameField : WideString ) : TMemoryStream; overload;
+    function getBlob( NameField : WideString ) : TMemoryStream; overload;
 
     function IntToString( NameField : WideString ) : WideString;
     function IntToStringZero( NameField : WideString; Size : Integer ) : WideString;
@@ -98,6 +117,9 @@ type
     function StringToInt( NameField : WideString ) : Integer;
     function StringToLog( NameField : WideString ) : Int64;
     function CurrencyToString( NameField : WideString; Format : WideString = '#0.00' ) : WideString;
+
+    constructor Create; override;
+    destructor Destroy; override;
   end;
 
 function Ping(const AHost : string) : Boolean;
@@ -109,6 +131,7 @@ implementation
 function TSqlQuery.Execute(var Query: TZQuery): TSqlQuery;
 var
   Executed : Boolean;
+  I: Integer;
 begin
   if not Ping( Query.Connection.HostName ) then
     raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.HostName );
@@ -122,8 +145,8 @@ begin
         Query.SQL.Clear;
         Query.SQL.Add( GetString );
 
-        if Assigned( Self.FFieldBytea ) then
-          Query.Params.ParamByName('file').LoadFromStream( Self.FFieldBytea, ftBlob );
+        for I := 0 to Self.FFieldBlob.Count -1 do
+          Query.Params.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
 
         Query.ExecSQL;
 
@@ -146,6 +169,7 @@ begin
   finally
     Query.EnableControls;
     Clear;
+    FieldBlobClear;
     Result := Self;
   end;
 end;
@@ -224,6 +248,12 @@ begin
     Result := Self.FDataSet.RecordCount;
 end;
 
+constructor TSQLQuery.Create;
+begin
+  inherited Create;
+  Self.FFieldBlob := TList<TBlobFieldsinSQL>.Create;
+end;
+
 function TSQLQuery.CurrencyToString(NameField, Format: WideString): WideString;
 begin
   if Length(Trim(Format)) = 0  then
@@ -238,6 +268,26 @@ begin
     Format := 'yyyy.mm.dd hh:nn:ss';
 
   Result := FormatDateTime( Format, getDateTime(NameField) );
+end;
+
+destructor TSQLQuery.Destroy;
+begin
+  FieldBlobClear;
+  FreeAndNil( Self.FFieldBlob );
+  inherited;
+end;
+
+procedure TSQLQuery.FieldBlobClear;
+var
+  I: Integer;
+  Obj : TBlobFieldsinSQL;
+begin
+  for I := Self.FFieldBlob.Count -1  downto 0 do
+  begin
+    Obj := Self.FFieldBlob[I];
+    FreeAndNil(Obj);
+    Self.FFieldBlob.Delete(I);
+  end;
 end;
 
 function TSQLQuery.First : TSQLQuery;
@@ -275,6 +325,7 @@ end;
 function TSqlQuery.Execute(var Query: TFDQuery): TSqlQuery;
 var
   Executed : Boolean;
+  I: Integer;
 begin
   if not Ping( Query.Connection.Params.Values['server'] ) then
     raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.ConnectionString );
@@ -288,8 +339,8 @@ begin
         Query.SQL.Clear;
         Query.SQL.Add( GetString );
 
-        if Assigned( Self.FFieldBytea ) then
-          Query.Params.ParamByName('file').LoadFromStream( Self.FFieldBytea, ftBlob );
+        for I := 0 to Self.FFieldBlob.Count -1 do
+          Query.Params.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
 
         Query.ExecSQL;
 
@@ -312,6 +363,7 @@ begin
   finally
     Query.EnableControls;
     Clear;
+    FieldBlobClear;
     Result := Self;
   end;
 end;
@@ -443,11 +495,6 @@ begin
   Result := Self;
 end;
 
-procedure TSQLQuery.SetFieldBytea(const Value: TMemoryStream);
-begin
-  FFieldBytea := Value;
-end;
-
 function TSQLQuery.StringToInt(NameField: WideString): Integer;
 begin
   Result := StrToIntDef(Self.FDataSet.FieldByName(NameField).AsWideString,0);
@@ -458,6 +505,19 @@ begin
   Result := StrToInt64Def(FDataSet.FieldByName(NameField).AsWideString, 0);
 end;
 
+function TSQLQuery.UpFieldBlob(FieldName: WideString; FieldBlob: TMemoryStream): TSQLQuery;
+var
+  I : Integer;
+begin
+  I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
+  Self.FFieldBlob[I].FFieldName := FieldName;
+  Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
+
+  Self.Add( FieldName + ' = :' + Trim(FieldName) );
+
+  Result := Self;
+end;
+
 function TSQLQuery.getInteger(NameField: WideString): Integer;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsInteger;
@@ -466,6 +526,19 @@ end;
 function TSQLQuery.getWideString(NameField: WideString): WideString;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsWideString;
+end;
+
+function TSQLQuery.FieldBlob(FieldName: WideString; FieldBlob: TMemoryStream): TSQLQuery;
+var
+  I : Integer;
+begin
+  I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
+  Self.FFieldBlob[I].FFieldName := FieldName;
+  Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
+
+  Self.Add(' :' + Trim(FieldName) );
+
+  Result := Self;
 end;
 
 function TSQLQuery.IntToString(NameField: WideString): WideString;
@@ -520,10 +593,17 @@ begin
   Result := Self.FDataSet.FieldByName(NameField).AsLargeInt;
 end;
 
-function TSQLQuery.getMemoryStream(NameField: WideString): TMemoryStream;
+function TSQLQuery.getBlob(NameField: WideString): TMemoryStream;
+var
+  FieldStream : TStream;
 begin
-  Result := TMemoryStream.Create;
-  TBlobField( Self.FDataSet.FieldByName( NameField )).SaveToStream( Result );
+  try
+    FieldStream := Self.FDataSet.CreateBlobStream( Self.FDataSet.FieldByName( NameField ), bmRead );
+    Result := TMemoryStream.Create;
+    Result.LoadFromStream( FieldStream );
+  finally
+    FreeAndNil( FieldStream );
+  end;
 end;
 
 function TSQLQuery.getBoolean(NameField: WideString): Boolean;
@@ -559,14 +639,37 @@ begin
       MyIdIcmpClient.Ping;
     except
       Result := False;
-      MyIdIcmpClient.Free;
       Exit;
     end;
 
-    result := not (MyIdIcmpClient.ReplyStatus.ReplyStatusType <> rsEcho)
+    result := (MyIdIcmpClient.ReplyStatus.BytesReceived > 0);
   finally
     FreeAndNil( MyIdIcmpClient );
   end;
+end;
+
+{ TBlobFieldsinSQL }
+
+constructor TBlobFieldsinSQL.Create;
+begin
+  Self.FFieldName := '';
+  Self.FFieldBlob := TMemoryStream.Create;
+end;
+
+destructor TBlobFieldsinSQL.Destroy;
+begin
+  FreeAndnil( Self.FFieldBlob );
+  inherited;
+end;
+
+procedure TBlobFieldsinSQL.SetFieldBlob(const Value: TMemoryStream);
+begin
+  FFieldBlob := Value;
+end;
+
+procedure TBlobFieldsinSQL.SetFieldName(const Value: WideString);
+begin
+  FFieldName := Value;
 end;
 
 end.
