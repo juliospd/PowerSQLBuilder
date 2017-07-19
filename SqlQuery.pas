@@ -60,6 +60,7 @@ type
   private
     FDataSet : TDataSet;
     FFieldBlob: TList<TBlobFieldsinSQL>;
+    FFailCount : Integer;
 
     procedure FieldBlobClear;
 
@@ -136,9 +137,12 @@ begin
   if not Ping( Query.Connection.HostName ) then
     raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.HostName );
 
+  Executed := False;
+
   try
+    Self.FFailCount := 0;
+
     repeat
-      Executed := False;
       try
         Query.DisableControls;
         Query.Close;
@@ -154,15 +158,31 @@ begin
       except
         on e: Exception do
         begin
-          if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+          if PostGreSQL then
           begin
-            Query.Connection.Disconnect;
-            Query.Connection.Connect;
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Query.Connection.Disconnect;
+              Query.Connection.Connect;
+            end
+            else raise;
           end
           else
           begin
-            raise;
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Query.Connection.Disconnect;
+              Query.Connection.Connect;
+            end
+            else raise;
           end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
         end;
       end;
     until (Executed);
@@ -181,9 +201,12 @@ begin
   if not Ping( Query.Connection.HostName ) then
     raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.HostName );
 
+  Executed := False;
+
   try
+    Self.FFailCount := 0;
+
     repeat
-      Executed := False;
       try
         Query.DisableControls;
         Query.Close;
@@ -197,15 +220,31 @@ begin
       except
         on e: Exception do
         begin
-          if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          if PostGreSQL then
           begin
-            Query.Connection.Disconnect;
-            Query.Connection.Connect;
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Query.Connection.Disconnect;
+              Query.Connection.Connect;
+            end
+            else raise;
           end
           else
           begin
-            raise;
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Query.Connection.Disconnect;
+              Query.Connection.Connect;
+            end
+            else raise;
           end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
         end;
       end;
     until (Executed);
@@ -330,9 +369,12 @@ begin
   if not Ping( Query.Connection.Params.Values['server'] ) then
     raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.ConnectionString );
 
+  Executed := False;
+
   try
+    Self.FFailCount := 0;
+
     repeat
-      Executed := False;
       try
         Query.DisableControls;
         Query.Close;
@@ -348,15 +390,31 @@ begin
       except
         on e: Exception do
         begin
-          if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+          if PostGreSQL then
           begin
-            Query.Connection.Connected := False;
-            Query.Connection.Connected := True;
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Query.Connection.Connected := False;
+              Query.Connection.Connected := True;
+            end
+            else raise;
           end
           else
           begin
-            raise;
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Query.Connection.Connected := False;
+              Query.Connection.Connected := True;
+            end
+            else raise;
           end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
         end;
       end;
     until (Executed);
@@ -375,9 +433,12 @@ begin
   if not Ping( Query.Connection.Params.Values['server'] ) then
     raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.ConnectionString );
 
+  Executed := False;
+
   try
+    Self.FFailCount := 0;
+
     repeat
-      Executed := False;
       try
         Query.DisableControls;
         Query.Close;
@@ -391,15 +452,31 @@ begin
       except
         on e: Exception do
         begin
-          if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          if PostGreSQL then
           begin
-            Query.Connection.Connected := False;
-            Query.Connection.Connected := True;
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Query.Connection.Connected := False;
+              Query.Connection.Connected := True;
+            end
+            else raise;
           end
           else
           begin
-            raise;
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Query.Connection.Connected := False;
+              Query.Connection.Connected := True;
+            end
+            else raise;
           end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
         end;
       end;
     until (Executed);
