@@ -3,8 +3,8 @@ program Teste;
 uses
   Vcl.Forms,
   Main in 'Main.pas' {frmMain},
-  PowerSqlBuilder in 'PowerSqlBuilder.pas',
-  SqlQuery in 'SqlQuery.pas';
+  PowerSqlBuilder in '..\PowerSqlBuilder.pas',
+  SqlQuery in '..\SqlQuery.pas';
 
 {$R *.res}
 

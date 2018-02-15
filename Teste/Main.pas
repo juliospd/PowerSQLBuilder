@@ -1,3 +1,18 @@
+{
+   Nome do Projeto     : Teste
+   Local do Projeto    : D:\Projects\PowerSQLBuilder-master\PowerSQLBuilder-master\Teste\
+   -----------------------------------------------------------------------------
+   Nome da Unidade     : Main.pas
+   Criação da Unidade  : 15/02/2018 08:51:24
+   Local da Unidade    : 'D:\Projects\PowerSQLBuilder-master\PowerSQLBuilder-master\Teste'
+   -----------------------------------------------------------------------------
+   Objetivo do Projeto : Objetivo deste codigo é apenas de ilustração para lhe
+                         demonstrar a sintaxe dos comandos.
+
+   -----------------------------------------------------------------------------
+   Desenvolvedor       : Julio
+   IDE Utilizada       : RAD Studio 101_BERLIN
+}
 unit Main;
 
 interface
@@ -35,14 +50,15 @@ type
     zCmd: TZQuery;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     FSQL : TSQLQuery;
     FModel : TModelClientes;
 
-    procedure Select;
-    procedure Insert;
-    procedure Delete;
-    procedure Update;
+    procedure SQLSelect;
+    procedure SQLInsert;
+    procedure SQLDelete;
+    procedure SQLUpdate;
   public
   end;
 
@@ -53,11 +69,13 @@ implementation
 
 {$R *.dfm}
 
-procedure TfrmMain.Delete;
+procedure TfrmMain.SQLDelete;
 begin
+  if not Assigned( Self.FModel ) then
+    Exit;
+
   Self.FSQL.DeleteFrom('clientes').Where('nome').Like( Self.FModel.nome ).&And('ativo').Equal( Self.FModel.ativo );
-  Self.FSQL.&And('data').Equal( Self.FModel.data );
-  Self.FSQL.Execute( zCmd );
+  Self.FSQL.&And('data').Equal( Self.FModel.data ).Execute( zCmd );
 end;
 
 procedure TfrmMain.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -65,14 +83,25 @@ begin
   Self.FSQL := TSQLQuery.Create;
 end;
 
+procedure TfrmMain.FormCreate(Sender: TObject);
+begin
+  SQLSelect;
+  SQLInsert;
+  SQLDelete;
+  SQLUpdate;
+end;
+
 procedure TfrmMain.FormDestroy(Sender: TObject);
 begin
   FreeAndNil( Self.FSQL );
 end;
 
-procedure TfrmMain.Insert;
+procedure TfrmMain.SQLInsert;
 begin
-  // se é um modelo você poderia informar assim
+  if not Assigned( Self.FModel ) then
+    Exit;
+
+  // se for um Model você poderia informar assim
   // Self.FSQL.Insert('clientes').Fields( Self.FModel.ToString )
   // mais esta conversão estaria no sei model através de processos RTTI.
 
@@ -80,26 +109,28 @@ begin
   Self.FSQL.Field( Self.FModel.nome ).Next;
   Self.FSQL.Field( Self.FModel.limite ).Next;
   Self.FSQL.Field( Self.FModel.ativo ).Next;
-  Self.FSQL.Field( Self.FModel.data ).EndValues;
-  Self.FSQL.Execute( zCmd );
+  Self.FSQL.Field( Self.FModel.data ).EndValues.Execute( zCmd );
 end;
 
-procedure TfrmMain.Select;
+procedure TfrmMain.SQLSelect;
 begin
+  if not Assigned( Self.FModel ) then
+    Exit;
+
   // Select 1
-  Self.FSQL.Select('nome, limite, ativo').From('clientes').Order_By('id');
-  Self.FSQL.Open( zCmd );
+  Self.FSQL.Select('nome, limite, ativo').From('clientes').Order_By('id').Open( zCmd );
   // Select 2
-  Self.FSQL.SelectFrom('clientes').Where('ativo').Equal( Self.FModel.ativo ).&And('limite').MajorEqual( Self.FModel.limite ).Order_By('id');
-  Self.FSQL.Open( zCmd );
+  Self.FSQL.SelectFrom('clientes').Where('ativo').Equal( Self.FModel.ativo ).&And('limite').MajorEqual( Self.FModel.limite ).Order_By('id').Open( zCmd );
 end;
 
-procedure TfrmMain.Update;
+procedure TfrmMain.SQLUpdate;
 begin
+  if not Assigned( Self.FModel ) then
+    Exit;
+
   // a função UpField pedo o nome do campo e seu valor
   Self.FSQL.Update('clientes').UpField('limite', Self.FModel.limite ).Next;
-  Self.FSQL.UpField('data', Self.FModel.data ).Where('ativo').Equal( Self.FModel.ativo );
-  Self.FSQL.Execute( zCmd );
+  Self.FSQL.UpField('data', Self.FModel.data ).Where('ativo').Equal( Self.FModel.ativo ).Execute( zCmd );
 end;
 
 { TModelClientes }
