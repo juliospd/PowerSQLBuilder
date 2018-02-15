@@ -61,12 +61,24 @@ type
     FDataSet : TDataSet;
     FFieldBlob: TList<TBlobFieldsinSQL>;
     FFailCount : Integer;
+    FLogSQL: Boolean;
+    FPathLog: WideString;
+
+    procedure ExecuteZeus(var Query : TZQuery );
+    procedure ExecuteFire(var Query : TFDQuery );
+    procedure OpenZeus(var query : TZQuery );
+    procedure OpenFire(var query : TFDQuery );
 
     procedure FieldBlobClear;
+    procedure WriteLog( Log : WideString );
 
     procedure SetDataSet(const Value: TDataSet);
+    procedure SetLogSQL(const Value: Boolean);
+    procedure SetPathLog(const Value: WideString);
   public
     property DataSet : TDataSet read FDataSet write SetDataSet;
+    property LogSQL : Boolean read FLogSQL write SetLogSQL;
+    property PathLog : WideString read FPathLog write SetPathLog;
 
     function FieldBlob( FieldName : WideString; FieldBlob : TMemoryStream ) : TSQLQuery; virtual;
     function UpFieldBlob( FieldName : WideString; FieldBlob : TMemoryStream ) : TSQLQuery; virtual;
@@ -99,15 +111,17 @@ type
     function Edit : TSQLQuery; virtual;
     function Post : TSQLQuery; virtual;
     //
-    function getInteger( NameField : WideString ) : Integer; overload;
-    function getLongInt( NameField : WideString ) : Int64; overload;
-    function getWideString( NameField : WideString ) : WideString; overload;
-    function getAnsiString( NameField : WideString ) : AnsiString; overload;
-    function getFloat( NameField : WideString ) : Double; overload;
-    function getCurrency( NameField : WideString ) : Currency; overload;
-    function getBoolean( NameField : WideString ) : Boolean; overload;
-    function getDateTime( NameField : WideString ) : TDateTime; overload;
-    function getBlob( NameField : WideString ) : TMemoryStream; overload;
+    function getInteger( NameField : WideString ) : Integer; virtual;
+    function getLongInt( NameField : WideString ) : Int64; virtual;
+    function getWideString( NameField : WideString ) : WideString; virtual;
+    function getAnsiString( NameField : WideString ) : AnsiString; virtual;
+    function getFloat( NameField : WideString ) : Double; virtual;
+    function getCurrency( NameField : WideString ) : Currency; virtual;
+    function getBoolean( NameField : WideString ) : Boolean; virtual;
+    function getDateTime( NameField : WideString ) : TDateTime; virtual;
+    function getBlob( NameField : WideString ) : TMemoryStream; virtual;
+    //
+    function isEmpty( NameField : WideString ) : Boolean; virtual;
 
     function IntToString( NameField : WideString ) : WideString;
     function IntToStringZero( NameField : WideString; Size : Integer ) : WideString;
@@ -118,6 +132,7 @@ type
     function StringToInt( NameField : WideString ) : Integer;
     function StringToLog( NameField : WideString ) : Int64;
     function CurrencyToString( NameField : WideString; Format : WideString = '#0.00' ) : WideString;
+    function QueryToString : WideString;
 
     constructor Create; override;
     destructor Destroy; override;
@@ -130,129 +145,15 @@ implementation
 { TSqlQuery }
 
 function TSqlQuery.Execute(var Query: TZQuery): TSqlQuery;
-var
-  Executed : Boolean;
-  I: Integer;
 begin
-  if not Ping( Query.Connection.HostName ) then
-    raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.HostName );
-
-  Executed := False;
-
-  try
-    Self.FFailCount := 0;
-
-    repeat
-      try
-        Query.DisableControls;
-        Query.Close;
-        Query.SQL.Clear;
-        Query.SQL.Add( GetString );
-
-        for I := 0 to Self.FFieldBlob.Count -1 do
-          Query.Params.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
-
-        Query.ExecSQL;
-
-        Executed := True;
-      except
-        on e: Exception do
-        begin
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
-            begin
-              Query.Connection.Disconnect;
-              Query.Connection.Connect;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
-            begin
-              Query.Connection.Disconnect;
-              Query.Connection.Connect;
-            end
-            else raise;
-          end;
-
-          Inc(Self.FFailCount);
-
-          Executed := (Self.FFailCount > 3);
-
-          if Executed then
-            raise;
-        end;
-      end;
-    until (Executed);
-  finally
-    Query.EnableControls;
-    Clear;
-    FieldBlobClear;
-    Result := Self;
-  end;
+  ExecuteZeus( Query );
+  Result := Self;
 end;
 
 function TSqlQuery.Open(var query: TZQuery): TSqlQuery;
-var
-  Executed : Boolean;
 begin
-  if not Ping( Query.Connection.HostName ) then
-    raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.HostName );
-
-  Executed := False;
-
-  try
-    Self.FFailCount := 0;
-
-    repeat
-      try
-        Query.DisableControls;
-        Query.Close;
-        Query.SQL.Clear;
-        Query.SQL.Add( GetString );
-        Query.Open;
-
-        Self.FDataSet := (Query as TDataSet);
-
-        Executed := True;
-      except
-        on e: Exception do
-        begin
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
-            begin
-              Query.Connection.Disconnect;
-              Query.Connection.Connect;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
-            begin
-              Query.Connection.Disconnect;
-              Query.Connection.Connect;
-            end
-            else raise;
-          end;
-
-          Inc(Self.FFailCount);
-
-          Executed := (Self.FFailCount > 3);
-
-          if Executed then
-            raise;
-        end;
-      end;
-    until (Executed);
-  finally
-    Query.EnableControls;
-    Clear;
-    Result := Self;
-  end;
+  OpenZeus( query );
+  Result := Self;
 end;
 
 function TSQLQuery.Active: Boolean;
@@ -291,6 +192,10 @@ constructor TSQLQuery.Create;
 begin
   inherited Create;
   Self.FFieldBlob := TList<TBlobFieldsinSQL>.Create;
+  Self.onExecuteZeus := ExecuteZeus;
+  Self.onExecuteFire := ExecuteFire;
+  Self.onOpenZeus    := OpenZeus;
+  Self.onOpenFire    := OpenFire;
 end;
 
 function TSQLQuery.CurrencyToString(NameField, Format: WideString): WideString;
@@ -362,13 +267,16 @@ begin
 end;
 
 function TSqlQuery.Execute(var Query: TFDQuery): TSqlQuery;
+begin
+  ExecuteFire( Query );
+  Result := Self;
+end;
+
+procedure TSQLQuery.ExecuteFire(var Query: TFDQuery);
 var
   Executed : Boolean;
   I: Integer;
 begin
-  if not Ping( Query.Connection.Params.Values['server'] ) then
-    raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.ConnectionString );
-
   Executed := False;
 
   try
@@ -376,6 +284,9 @@ begin
 
     repeat
       try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
         Query.DisableControls;
         Query.Close;
         Query.SQL.Clear;
@@ -390,6 +301,9 @@ begin
       except
         on e: Exception do
         begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
           if PostGreSQL then
           begin
             if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
@@ -422,17 +336,14 @@ begin
     Query.EnableControls;
     Clear;
     FieldBlobClear;
-    Result := Self;
   end;
 end;
 
-function TSqlQuery.Open(var query: TFDQuery): TSqlQuery;
+procedure TSQLQuery.ExecuteZeus(var Query: TZQuery);
 var
   Executed : Boolean;
+  I: Integer;
 begin
-  if not Ping( Query.Connection.Params.Values['server'] ) then
-    raise Exception.Create('Falha de conexão com o Servidor de banco de dados : ' + Query.Connection.ConnectionString );
-
   Executed := False;
 
   try
@@ -440,6 +351,81 @@ begin
 
     repeat
       try
+        if LogSQL then
+          WriteLog( GetString );
+
+        Query.DisableControls;
+        Query.Close;
+        Query.SQL.Clear;
+        Query.SQL.Add( GetString );
+
+        for I := 0 to Self.FFieldBlob.Count -1 do
+          Query.Params.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
+
+        Query.ExecSQL;
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          if PostGreSQL then
+          begin
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Query.Connection.Disconnect;
+              Query.Connection.Connect;
+            end
+            else raise;
+          end
+          else
+          begin
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Query.Connection.Disconnect;
+              Query.Connection.Connect;
+            end
+            else raise;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Query.EnableControls;
+    Clear;
+    FieldBlobClear;
+  end;
+end;
+
+function TSqlQuery.Open(var query: TFDQuery): TSqlQuery;
+begin
+  OpenFire( query );
+  Result := Self;
+end;
+
+procedure TSQLQuery.OpenFire(var query: TFDQuery);
+var
+  Executed : Boolean;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
         Query.DisableControls;
         Query.Close;
         Query.SQL.Clear;
@@ -452,6 +438,9 @@ begin
       except
         on e: Exception do
         begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
           if PostGreSQL then
           begin
             if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
@@ -483,7 +472,69 @@ begin
   finally
     Query.EnableControls;
     Clear;
-    Result := Self;
+  end;
+end;
+
+procedure TSQLQuery.OpenZeus(var query: TZQuery);
+var
+  Executed : Boolean;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
+        Query.DisableControls;
+        Query.Close;
+        Query.SQL.Clear;
+        Query.SQL.Add( GetString );
+        Query.Open;
+
+        Self.FDataSet := (Query as TDataSet);
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          if PostGreSQL then
+          begin
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Query.Connection.Disconnect;
+              Query.Connection.Connect;
+            end
+            else raise;
+          end
+          else
+          begin
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Query.Connection.Disconnect;
+              Query.Connection.Connect;
+            end
+            else raise;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Query.EnableControls;
+    Clear;
   end;
 end;
 
@@ -501,6 +552,33 @@ begin
     Self.FDataSet.Prior;
 
   Result := Self;
+end;
+
+function TSQLQuery.QueryToString: WideString;
+var
+  I: Integer;
+begin
+  Result := '';
+  if Assigned( Self.FDataSet ) then
+  begin
+    if Self.FDataSet.RecordCount > 0 then
+    begin
+      Clear;
+
+      for I := 0 to Self.FDataSet.FieldCount -1 do
+      begin
+        case Self.FDataSet.FieldList[I].DataType of
+          ftWideString, ftString : Add( Self.FDataSet.FieldList[I].FieldName ).Equal( Self.FDataSet.FieldByName( Self.FDataSet.FieldList[I].FieldName ).AsWideString ).Next;
+          ftShortint, ftSmallint, ftInteger, ftWord : Add( Self.FDataSet.FieldList[I].FieldName ).Equal( Self.FDataSet.FieldByName( Self.FDataSet.FieldList[I].FieldName ).AsInteger ).Next;
+          ftBoolean : Add( Self.FDataSet.FieldList[I].FieldName ).Equal( Self.FDataSet.FieldByName( Self.FDataSet.FieldList[I].FieldName ).AsBoolean ).Next;
+          ftFloat, ftCurrency : Add( Self.FDataSet.FieldList[I].FieldName ).Equal( Self.FDataSet.FieldByName( Self.FDataSet.FieldList[I].FieldName ).AsFloat ).Next;
+          ftDate, ftTime, ftDateTime : Add( Self.FDataSet.FieldList[I].FieldName ).Equal( Self.FDataSet.FieldByName( Self.FDataSet.FieldList[I].FieldName ).AsDateTime ).Next;
+        end;
+      end;
+      Result := GetString;
+      Clear;
+    end;
+  end;
 end;
 
 function TSQLQuery.RecNo: Integer;
@@ -548,6 +626,16 @@ begin
   Result := Self;
 end;
 
+procedure TSQLQuery.SetLogSQL(const Value: Boolean);
+begin
+  FLogSQL := Value;
+end;
+
+procedure TSQLQuery.SetPathLog(const Value: WideString);
+begin
+  FPathLog := Value;
+end;
+
 function TSQLQuery.SetField(Field: WideString; Value: Int64): TSQLQuery;
 begin
   if Active then
@@ -586,13 +674,37 @@ function TSQLQuery.UpFieldBlob(FieldName: WideString; FieldBlob: TMemoryStream):
 var
   I : Integer;
 begin
-  I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
-  Self.FFieldBlob[I].FFieldName := FieldName;
-  Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
+  if Assigned( FieldBlob ) then
+  begin
+    I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
+    Self.FFieldBlob[I].FFieldName := FieldName;
+    Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
 
-  Self.Add( FieldName + ' = :' + Trim(FieldName) );
+    Self.Add( ' ' + FieldName + ' = :' + Trim(FieldName) );
+  end;
 
   Result := Self;
+end;
+
+procedure TSQLQuery.WriteLog(Log: WideString);
+var
+  FileLog: TextFile;
+begin
+  try
+    if PathLog = '' then
+      Exit;
+
+    System.AssignFile( FileLog, PathLog + 'LogSQL.txt' );
+
+    if FileExists( PathLog + 'LogSQL.txt' ) then
+      System.Append( FileLog )
+    else
+      System.Rewrite( FileLog );
+
+    System.Writeln( FileLog , FormatDateTime('yyyy-mm-dd hh:mm:ss - ', Now ) + Log );
+
+    System.CloseFile(FileLog);
+  except end;
 end;
 
 function TSQLQuery.getInteger(NameField: WideString): Integer;
@@ -609,11 +721,15 @@ function TSQLQuery.FieldBlob(FieldName: WideString; FieldBlob: TMemoryStream): T
 var
   I : Integer;
 begin
-  I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
-  Self.FFieldBlob[I].FFieldName := FieldName;
-  Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
+  if Assigned( FieldBlob ) then
+  begin
+    I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
+    Self.FFieldBlob[I].FFieldName := FieldName;
+    Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
 
-  Self.Add(' :' + Trim(FieldName) );
+    Self.Add(' :' + Trim(FieldName) );
+  end
+  else Self.Add('null ');
 
   Result := Self;
 end;
@@ -629,6 +745,11 @@ begin
     Result := Format( '%.' + IntToStr(Size) + 'd', [getInteger(NameField)])
   else
     Result := IntToStr( getInteger(NameField) );
+end;
+
+function TSQLQuery.isEmpty(NameField: WideString): Boolean;
+begin
+  Result := Self.FDataSet.FieldByName(NameField).IsNull;
 end;
 
 function TSQLQuery.Last : TSQLQuery;
@@ -708,6 +829,13 @@ var
   MyIdIcmpClient : TIdIcmpClient;
 begin
   try
+    if (aHost = '127.0.0.1') or (UpperCase(aHost) = 'LOCALHOST') then
+    begin
+      Result := True;
+      Exit;
+    end;
+
+
     MyIdIcmpClient := TIdIcmpClient.Create(nil);
     MyIdIcmpClient.ReceiveTimeout := 200;
     MyIdIcmpClient.Host := AHost;
