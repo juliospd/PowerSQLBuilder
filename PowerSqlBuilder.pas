@@ -27,9 +27,22 @@ unit PowerSqlBuilder;
 interface
 
 uses
-  System.SysUtils, System.Classes, System.StrUtils, System.DateUtils;
+  System.SysUtils, System.Classes, System.StrUtils, System.DateUtils,
+  {ZeusLib}
+  ZAbstractRODataset, ZAbstractDataset, ZDataset, ZConnection, ZAbstractTable,
+  {FireDac}
+  FireDAC.Stan.Intf, FireDAC.Stan.Option,FireDAC.Stan.Error, Rest.Json,
+  FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool,
+  FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Stan.Param, FireDAC.DatS,
+  FireDAC.DApt.Intf,FireDAC.DApt, FireDAC.Phys.PGDef, FireDAC.VCLUI.Wait,
+  FireDAC.Comp.UI, FireDAC.Phys.PG, FireDAC.Comp.DataSet, FireDAC.Comp.Client;
 
 type
+  TExecuteZ = procedure (var Query : TZQuery ) of object;
+  TExecuteF = procedure (var Query : TFDQuery ) of object;
+  TOpenZ = procedure (var query : TZQuery ) of object;
+  TOpenF = procedure (var query : TFDQuery ) of object;
+
   /// <summary>
   ///   PowerSQLBuilder é uma classe de manipulação SQL
   /// </summary>
@@ -49,6 +62,10 @@ type
     FValuePSB : TStringBuilder;
     FPostGreSQL: Boolean;
     FWhere : Boolean;
+    FonOpenFire: TOpenF;
+    FonOpenZeus: TOpenZ;
+    FonExecuteFire: TExecuteF;
+    FonExecuteZeus: TExecuteZ;
 
     function Test( const Value : WideString; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Test( const Value : Double; DecimalValue : ShortInt = 2; Condition : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
@@ -60,8 +77,16 @@ type
     function TestOfTime( const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = ''; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
 
     procedure SetPostGreSQL(const Value: Boolean);
+    procedure SetonExecuteFire(const Value: TExecuteF);
+    procedure SetonExecuteZeus(const Value: TExecuteZ);
+    procedure SetonOpenFire(const Value: TOpenF);
+    procedure SetonOpenZeus(const Value: TOpenZ);
   public
     property PostGreSQL : Boolean read FPostGreSQL write SetPostGreSQL;
+    property onExecuteZeus : TExecuteZ read FonExecuteZeus write SetonExecuteZeus;
+    property onExecuteFire : TExecuteF read FonExecuteFire write SetonExecuteFire;
+    property onOpenZeus : TOpenZ read FonOpenZeus write SetonOpenZeus;
+    property onOpenFire : TOpenF read FonOpenFire write SetonOpenFire;
     // Funções simples
     function Add(const Value : WideString) : TPowerSQLBuilder; virtual;
     function AddQuoted(const Value : WideString) : TPowerSQLBuilder; virtual;
@@ -206,7 +231,11 @@ type
     function AlterTable(const Value : WideString ) : TPowerSQLBuilder; virtual;
     function AutoIncrement(const Value : Integer ) : TPowerSQLBuilder; virtual;
     function EndIn : TPowerSQLBuilder; virtual;
+    function Returning( Field : WideString ) : TPowerSQLBuilder; virtual;
     //
+    function Empty : TPowerSQLBuilder; virtual;
+    function &Is : TPowerSQLBuilder; virtual;
+    function &IsNull : TPowerSQLBuilder; virtual;
     function &As( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &Not( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &Or( const Value : WideString ) : TPowerSQLBuilder; virtual;
@@ -235,6 +264,13 @@ type
     function &End( Name : WideString ) : TPowerSQLBuilder; overload; virtual;
     function &End : TPowerSQLBuilder; overload; virtual;
 
+    function GetJson( var Query : TZQuery; NameArray : WideString ) : WideString; overload;
+
+    function Execute(var Query : TZQuery ) : TPowerSQLBuilder; overload;
+    function Execute(var Query : TFDQuery ) : TPowerSQLBuilder; overload;
+    function Open(var query : TZQuery ) : TPowerSQLBuilder; overload;
+    function Open(var query : TFDQuery ) : TPowerSQLBuilder; overload;
+
     constructor Create; virtual;
     destructor Destroy; override;
   end;
@@ -246,6 +282,22 @@ implementation
 function TPowerSQLBuilder.&ON(const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' on (').Add( Value ).EndValues;
+end;
+
+function TPowerSQLBuilder.Open(var query: TFDQuery): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FonOpenFire ) then
+    Self.FonOpenFire( Query );
+
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.Open(var query: TZQuery): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FonOpenZeus ) then
+    Self.FonOpenZeus( Query );
+
+  Result := Self;
 end;
 
 function TPowerSQLBuilder.&IN(const Value: WideString): TPowerSQLBuilder;
@@ -308,6 +360,11 @@ begin
   Result := Add(' else ').Field( Value );
 end;
 
+function TPowerSQLBuilder.Empty: TPowerSQLBuilder;
+begin
+  Result := Add(' null ');
+end;
+
 function TPowerSQLBuilder.&Else(Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' else ').Add( Value );
@@ -361,6 +418,16 @@ end;
 function TPowerSQLBuilder.&Then(Value: TDateTime; Mask: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' then ').Field( Value, Mask );
+end;
+
+function TPowerSQLBuilder.&Is: TPowerSQLBuilder;
+begin
+  Result := Add(' is ');
+end;
+
+function TPowerSQLBuilder.&IsNull: TPowerSQLBuilder;
+begin
+  Result := Add(' is null ');
 end;
 
 function TPowerSQLBuilder.Add(const Value: WideString): TPowerSQLBuilder;
@@ -560,6 +627,22 @@ begin
   Result := TestOfTime( Value, Seconds, '=', Mask );
 end;
 
+function TPowerSQLBuilder.Execute(var Query: TFDQuery): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FonExecuteFire ) then
+    Self.FonExecuteFire( Query );
+
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.Execute(var Query: TZQuery): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FonExecuteZeus ) then
+    Self.FonExecuteZeus( Query );
+
+  Result := Self;
+end;
+
 function TPowerSQLBuilder.Field(const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
 begin
   if Mask = '' then
@@ -697,6 +780,33 @@ end;
 function TPowerSQLBuilder.Field(const Value: Double; DecimalValue : ShortInt): TPowerSQLBuilder;
 begin
   Result := Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
+end;
+
+function TPowerSQLBuilder.GetJson(var Query: TZQuery; NameArray: WideString): WideString;
+var
+  SqlFreeze : WideString;
+begin
+  Result := '';
+
+  if not Self.FPostGreSQL then
+    Exit;
+
+  SqlFreeze := GetString;
+
+  if Trim(NameArray) = '' then
+    NameArray := 'tabela';
+
+  Clear;
+
+  Add('SELECT CAST ( row_to_json ( T ) AS TEXT ) AS json  FROM ( ');
+  Add('select ');
+  Add('(select array_to_json(array_agg(row_to_json(a))) as json from ( ');
+  Add( SqlFreeze );
+  Add(') as a) as ').Add( NameArray ).Add(') AS T');
+
+  Open( Query );
+
+  Result := Query.FieldByName('json').AsWideString;
 end;
 
 function TPowerSQLBuilder.GetString: WideString;
@@ -974,6 +1084,11 @@ begin
   Result := Add(' order by ').Add( Value );
 end;
 
+function TPowerSQLBuilder.Returning(Field: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' returning ').Add( Field );
+end;
+
 function TPowerSQLBuilder.RightJoin: TPowerSQLBuilder;
 begin
   Result := Add(' Right Join');
@@ -1002,6 +1117,26 @@ end;
 function TPowerSQLBuilder.SelectFrom( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add('select * from ').Add( Value );
+end;
+
+procedure TPowerSQLBuilder.SetonExecuteFire(const Value: TExecuteF);
+begin
+  FonExecuteFire := Value;
+end;
+
+procedure TPowerSQLBuilder.SetonExecuteZeus(const Value: TExecuteZ);
+begin
+  FonExecuteZeus := Value;
+end;
+
+procedure TPowerSQLBuilder.SetonOpenFire(const Value: TOpenF);
+begin
+  FonOpenFire := Value;
+end;
+
+procedure TPowerSQLBuilder.SetonOpenZeus(const Value: TOpenZ);
+begin
+  FonOpenZeus := Value;
 end;
 
 procedure TPowerSQLBuilder.SetPostGreSQL(const Value: Boolean);
