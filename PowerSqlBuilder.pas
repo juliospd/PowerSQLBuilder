@@ -35,13 +35,23 @@ uses
   FireDAC.UI.Intf, FireDAC.Phys.Intf, FireDAC.Stan.Def, FireDAC.Stan.Pool,
   FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Stan.Param, FireDAC.DatS,
   FireDAC.DApt.Intf,FireDAC.DApt, FireDAC.Phys.PGDef, FireDAC.VCLUI.Wait,
-  FireDAC.Comp.UI, FireDAC.Phys.PG, FireDAC.Comp.DataSet, FireDAC.Comp.Client;
+  FireDAC.Comp.UI, FireDAC.Phys.PG, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  {UniDac}
+  MemDS, DBAccess, Uni;
 
 type
+  TExecuteZc = procedure (var Connection : TZConnection ) of object;
   TExecuteZ = procedure (var Query : TZQuery ) of object;
+
+  TExecuteFc = procedure (var Connection : TFDConnection ) of object;
   TExecuteF = procedure (var Query : TFDQuery ) of object;
+
+  TExecuteUc = procedure (var Connection : TUniConnection ) of object;
+  TExecuteU = procedure (var Query : TUniQuery ) of object;
+
   TOpenZ = procedure (var query : TZQuery ) of object;
   TOpenF = procedure (var query : TFDQuery ) of object;
+  TOpenU = procedure (var query : TUniQuery ) of object;
 
   /// <summary>
   ///   PowerSQLBuilder é uma classe de manipulação SQL
@@ -62,10 +72,16 @@ type
     FValuePSB : TStringBuilder;
     FPostGreSQL: Boolean;
     FWhere : Boolean;
-    FonOpenFire: TOpenF;
-    FonOpenZeus: TOpenZ;
-    FonExecuteFire: TExecuteF;
-    FonExecuteZeus: TExecuteZ;
+
+    FOpenFire: TOpenF;
+    FOpenZeus: TOpenZ;
+    FOpenUniDac : TOpenU;
+    FExecuteFire: TExecuteF;
+    FExecuteZeus: TExecuteZ;
+    FExecuteUniDac: TExecuteU;
+    FExecuteZeusC: TExecuteZc;
+    FExecuteFireC: TExecuteFc;
+    FExecuteUniDacC: TExecuteUc;
 
     function Test( const Value : WideString; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Test( const Value : Double; DecimalValue : ShortInt = 2; Condition : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
@@ -77,16 +93,10 @@ type
     function TestOfTime( const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = ''; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
 
     procedure SetPostGreSQL(const Value: Boolean);
-    procedure SetonExecuteFire(const Value: TExecuteF);
-    procedure SetonExecuteZeus(const Value: TExecuteZ);
-    procedure SetonOpenFire(const Value: TOpenF);
-    procedure SetonOpenZeus(const Value: TOpenZ);
+  protected
+    procedure SetFunctions( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; ExecuteFireC : TExecuteFc; ExecuteFire : TExecuteF; ExecuteUniDacC : TExecuteUc; ExecuteUniDac : TExecuteU; OpenZeus : TOpenZ; OpenFire : TOpenF; OpenUniDac : TOpenU );
   public
     property PostGreSQL : Boolean read FPostGreSQL write SetPostGreSQL;
-    property onExecuteZeus : TExecuteZ read FonExecuteZeus write SetonExecuteZeus;
-    property onExecuteFire : TExecuteF read FonExecuteFire write SetonExecuteFire;
-    property onOpenZeus : TOpenZ read FonOpenZeus write SetonOpenZeus;
-    property onOpenFire : TOpenF read FonOpenFire write SetonOpenFire;
     // Funções simples
     function Add(const Value : WideString) : TPowerSQLBuilder; virtual;
     function AddQuoted(const Value : WideString) : TPowerSQLBuilder; virtual;
@@ -154,6 +164,7 @@ type
     function Field( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
+    function FieldFloat( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; virtual;
     function FieldOfDate( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function FieldOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     // Campo e valor usado no Update
@@ -188,9 +199,11 @@ type
     function Group_By( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Values : TPowerSQLBuilder; virtual;
     function EndValues : TPowerSQLBuilder; virtual;
+    function EndValuesID : TPowerSQLBuilder; virtual;
     function Sum : TPowerSQLBuilder;  overload; virtual;
     function Sum( const Value : WideString ) : TPowerSQLBuilder;  overload; virtual;
     function SumAs( const Value : WideString; asValue : WideString ) : TPowerSQLBuilder; virtual;
+    function having( const Value : WideString ) : TPowerSQLBuilder; virtual;
     /// <summary>
     /// sP : Abre um Parentese Start Parent '('
     /// </summary>
@@ -236,6 +249,7 @@ type
     function Empty : TPowerSQLBuilder; virtual;
     function &Is : TPowerSQLBuilder; virtual;
     function &IsNull : TPowerSQLBuilder; virtual;
+    function &IsNotNull : TPowerSQLBuilder; virtual;
     function &As( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &Not( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &Or( const Value : WideString ) : TPowerSQLBuilder; virtual;
@@ -266,10 +280,15 @@ type
 
     function GetJson( var Query : TZQuery; NameArray : WideString ) : WideString; overload;
 
+    function Execute(var Connection : TZConnection ) : TPowerSQLBuilder; overload;
     function Execute(var Query : TZQuery ) : TPowerSQLBuilder; overload;
+    function Execute(var Connection : TFDConnection ) : TPowerSQLBuilder; overload;
     function Execute(var Query : TFDQuery ) : TPowerSQLBuilder; overload;
+    function Execute(var Connection : TUniConnection ) : TPowerSQLBuilder; overload;
+    function Execute(var Query : TUniQuery ) : TPowerSQLBuilder; overload;
     function Open(var query : TZQuery ) : TPowerSQLBuilder; overload;
     function Open(var query : TFDQuery ) : TPowerSQLBuilder; overload;
+    function Open(var query : TUniQuery ) : TPowerSQLBuilder; overload;
 
     constructor Create; virtual;
     destructor Destroy; override;
@@ -286,16 +305,16 @@ end;
 
 function TPowerSQLBuilder.Open(var query: TFDQuery): TPowerSQLBuilder;
 begin
-  if Assigned( Self.FonOpenFire ) then
-    Self.FonOpenFire( Query );
+  if Assigned( Self.FOpenFire ) then
+    Self.FOpenFire( Query );
 
   Result := Self;
 end;
 
 function TPowerSQLBuilder.Open(var query: TZQuery): TPowerSQLBuilder;
 begin
-  if Assigned( Self.FonOpenZeus ) then
-    Self.FonOpenZeus( Query );
+  if Assigned( Self.FOpenZeus ) then
+    Self.FOpenZeus( Query );
 
   Result := Self;
 end;
@@ -317,7 +336,7 @@ end;
 
 function TPowerSQLBuilder.&NOT_IN(const Value: WideString): TPowerSQLBuilder;
 begin
-  Result := Add(' not in (').Add( Value );
+  Result := Add(' not in (').Add( Value ).eP;
 end;
 
 function TPowerSQLBuilder.&IN: TPowerSQLBuilder;
@@ -423,6 +442,11 @@ end;
 function TPowerSQLBuilder.&Is: TPowerSQLBuilder;
 begin
   Result := Add(' is ');
+end;
+
+function TPowerSQLBuilder.IsNotNull: TPowerSQLBuilder;
+begin
+  Result := Add(' is not null ');
 end;
 
 function TPowerSQLBuilder.&IsNull: TPowerSQLBuilder;
@@ -599,9 +623,11 @@ begin
   Result := eP;
 end;
 
-/// <summary>
-///   End Parent ')'
-/// </summary>
+function TPowerSQLBuilder.EndValuesID: TPowerSQLBuilder;
+begin
+  Result := eP.Add(' returning id ');
+end;
+
 function TPowerSQLBuilder.eP: TPowerSQLBuilder;
 begin
   Result := Add(')');
@@ -627,18 +653,34 @@ begin
   Result := TestOfTime( Value, Seconds, '=', Mask );
 end;
 
+function TPowerSQLBuilder.Execute(var Connection: TZConnection): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FExecuteZeusC ) then
+    Self.FExecuteZeusC( Connection );
+
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.Execute(var Connection: TFDConnection): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FExecuteFireC ) then
+    Self.FExecuteFireC( Connection );
+
+  Result := Self;
+end;
+
 function TPowerSQLBuilder.Execute(var Query: TFDQuery): TPowerSQLBuilder;
 begin
-  if Assigned( Self.FonExecuteFire ) then
-    Self.FonExecuteFire( Query );
+  if Assigned( Self.FExecuteFire ) then
+    Self.FExecuteFire( Query );
 
   Result := Self;
 end;
 
 function TPowerSQLBuilder.Execute(var Query: TZQuery): TPowerSQLBuilder;
 begin
-  if Assigned( Self.FonExecuteZeus ) then
-    Self.FonExecuteZeus( Query );
+  if Assigned( Self.FExecuteZeus ) then
+    Self.FExecuteZeus( Query );
 
   Result := Self;
 end;
@@ -679,6 +721,11 @@ begin
     Add( IfThen(Value, '1', '0') );
 
   Result := Self;
+end;
+
+function TPowerSQLBuilder.FieldFloat(const Value: Double; DecimalValue: ShortInt): TPowerSQLBuilder;
+begin
+  Result := Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
 end;
 
 function TPowerSQLBuilder.Field(const Value: Int64): TPowerSQLBuilder;
@@ -847,6 +894,11 @@ end;
 function TPowerSQLBuilder.Group_By( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add(' group by ').Add( Value );
+end;
+
+function TPowerSQLBuilder.having(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' having (').Add( Value ).eP;
 end;
 
 function TPowerSQLBuilder.InnerJoin( const Value: WideString): TPowerSQLBuilder;
@@ -1119,24 +1171,20 @@ begin
   Result := Add('select * from ').Add( Value );
 end;
 
-procedure TPowerSQLBuilder.SetonExecuteFire(const Value: TExecuteF);
+procedure TPowerSQLBuilder.SetFunctions( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; ExecuteFireC : TExecuteFc; ExecuteFire : TExecuteF; ExecuteUniDacC : TExecuteUc; ExecuteUniDac : TExecuteU; OpenZeus : TOpenZ; OpenFire : TOpenF; OpenUniDac : TOpenU );
 begin
-  FonExecuteFire := Value;
-end;
+  Self.FExecuteFireC := ExecuteFireC;
+  Self.FExecuteFire := ExecuteFire;
 
-procedure TPowerSQLBuilder.SetonExecuteZeus(const Value: TExecuteZ);
-begin
-  FonExecuteZeus := Value;
-end;
+  Self.FExecuteZeusC := ExecuteZeusC;
+  Self.FExecuteZeus := ExecuteZeus;
 
-procedure TPowerSQLBuilder.SetonOpenFire(const Value: TOpenF);
-begin
-  FonOpenFire := Value;
-end;
+  Self.FExecuteUniDacC := ExecuteUniDacC;
+  Self.FExecuteUniDac := ExecuteUniDac;
 
-procedure TPowerSQLBuilder.SetonOpenZeus(const Value: TOpenZ);
-begin
-  FonOpenZeus := Value;
+  Self.FOpenFire := OpenFire;
+  Self.FOpenZeus := OpenZeus;
+  Self.FOpenUniDac := OpenUniDac;
 end;
 
 procedure TPowerSQLBuilder.SetPostGreSQL(const Value: Boolean);
@@ -1144,9 +1192,6 @@ begin
   FPostGreSQL := Value;
 end;
 
-/// <summary>
-///   Start Parent '('
-/// </summary>
 function TPowerSQLBuilder.sP: TPowerSQLBuilder;
 begin
   Result := Add(' (')
@@ -1281,7 +1326,7 @@ end;
 
 function TPowerSQLBuilder.Update( const Value : WideString ) : TPowerSQLBuilder;
 begin
-  Result := Add('update ').Add( Value ).Add(' set');
+  Result := Add('update ').Add( Value ).Add(' set ');
 end;
 
 function TPowerSQLBuilder.UpField(Field: WideString; const Value: Double; DecimalValue: ShortInt): TPowerSQLBuilder;
@@ -1364,6 +1409,30 @@ end;
 function TPowerSQLBuilder.DeleteFrom: TPowerSQLBuilder;
 begin
   Result := Add('delete from');
+end;
+
+function TPowerSQLBuilder.Execute( var Connection: TUniConnection): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FExecuteUniDacC ) then
+    Self.FExecuteUniDacC( Connection );
+
+  Result := Self
+end;
+
+function TPowerSQLBuilder.Execute(var Query: TUniQuery): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FExecuteUniDac ) then
+    Self.FExecuteUniDac( Query );
+
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.Open(var query: TUniQuery): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FOpenUniDac ) then
+    Self.FOpenUniDac( Query );
+
+  Result := Self;
 end;
 
 end.

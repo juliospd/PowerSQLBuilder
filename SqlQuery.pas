@@ -38,7 +38,9 @@ uses
   FireDAC.DApt.Intf,FireDAC.DApt, FireDAC.Phys.PGDef, FireDAC.VCLUI.Wait,
   FireDAC.Comp.UI, FireDAC.Phys.PG, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
   System.Generics.Defaults, System.Generics.Collections,
-  IdBaseComponent, IdComponent, IdRawBase, IdRawClient, IdIcmpClient;
+  IdBaseComponent, IdComponent, IdRawBase, IdRawClient, IdIcmpClient,
+  {UniDac}
+  MemDS, DBAccess, Uni;
 
 type
   TBlobFieldsinSQL = class
@@ -56,6 +58,20 @@ type
     destructor Destroy; override;
   end;
 
+  /// <summary>
+  ///   SQLBuilder é uma classe de manipulação SQL vinculada a PowerSQLBuilder
+  /// </summary>
+  /// <comments>
+  ///   Chega de ficar concatenando pedaços do texto gerando um scripts SQL manual
+  ///   com erros no script, através do PowerSQLBuilder você apenas chama os
+  ///   comandos SQL que ele mesmo interpreta e gera o scripts SQL automaticamente
+  ///   <para><c>Mais o que torna ele ágil é a possibilidade de passar parâmetros sem se preocupar
+  ///   com seu tipo de origem o PowerSQLBulder faz isso automaticamente para você.
+  ///   interpleta e gera o scripts SQL automaticamente</c></para>
+  /// </comments>
+  /// <remarks>
+  ///   Para saber mais entre no site https://github.com/juliospd/PowerSQLBuilder
+  /// </remarks>
   TSQLQuery = class( TPowerSQLBuilder )
   private
     FDataSet : TDataSet;
@@ -64,10 +80,18 @@ type
     FLogSQL: Boolean;
     FPathLog: WideString;
 
+    procedure ExecuteZeusC(var Connection : TZConnection );
     procedure ExecuteZeus(var Query : TZQuery );
+
+    procedure ExecuteFireC(var Connection : TFDConnection );
     procedure ExecuteFire(var Query : TFDQuery );
+
+    procedure ExecuteUniDacC(var Connection : TUniConnection );
+    procedure ExecuteUniDac(var Query : TUniQuery );
+
     procedure OpenZeus(var query : TZQuery );
     procedure OpenFire(var query : TFDQuery );
+    procedure OpenUniDac(var query : TUniQuery );
 
     procedure FieldBlobClear;
     procedure WriteLog( Log : WideString );
@@ -85,8 +109,14 @@ type
 
     function Execute(var Query : TZQuery ) : TSqlQuery; overload;
     function Execute(var Query : TFDQuery ) : TSqlQuery; overload;
+    function Execute(var Query : TUniQuery ) : TSqlQuery; overload;
+    function Execute(var Connection : TZConnection ) : TSqlQuery; overload;
+    function Execute(var Connection : TFDConnection ) : TSqlQuery; overload;
+    function Execute(var Connection : TUniConnection ) : TSqlQuery; overload;
+
     function Open(var query : TZQuery ) : TSqlQuery; overload;
     function Open(var query : TFDQuery ) : TSqlQuery; overload;
+    function Open(var query : TUniQuery ) : TSqlQuery; overload;
 
     // Atalhos do DataSet
     function RecordCount : Integer;
@@ -96,7 +126,6 @@ type
     function Active : Boolean;
     function SetField( Field : WideString; Value : WideString ) : TSQLQuery; overload; virtual;
     function SetField( Field : WideString; Value : Double ) : TSQLQuery; overload; virtual;
-    function SetField( Field : WideString; Value : Currency) : TSQLQuery; overload; virtual;
     function SetField( Field : WideString; Value : TDateTime ) : TSQLQuery; overload; virtual;
     function SetField( Field : WideString; Value : Int64 ) : TSQLQuery; overload; virtual;
     function SetField( Field : WideString; Value : Integer ) : TSQLQuery; overload; virtual;
@@ -116,7 +145,7 @@ type
     function getWideString( NameField : WideString ) : WideString; virtual;
     function getAnsiString( NameField : WideString ) : AnsiString; virtual;
     function getFloat( NameField : WideString ) : Double; virtual;
-    function getCurrency( NameField : WideString ) : Currency; virtual;
+    function getCurrency( NameField : WideString ) : Double; virtual;
     function getBoolean( NameField : WideString ) : Boolean; virtual;
     function getDateTime( NameField : WideString ) : TDateTime; virtual;
     function getBlob( NameField : WideString ) : TMemoryStream; virtual;
@@ -192,10 +221,19 @@ constructor TSQLQuery.Create;
 begin
   inherited Create;
   Self.FFieldBlob := TList<TBlobFieldsinSQL>.Create;
-  Self.onExecuteZeus := ExecuteZeus;
-  Self.onExecuteFire := ExecuteFire;
-  Self.onOpenZeus    := OpenZeus;
-  Self.onOpenFire    := OpenFire;
+
+  SetFunctions
+  (
+    ExecuteZeusC,
+    ExecuteZeus,
+    ExecuteFireC,
+    ExecuteFire,
+    ExecuteUniDacC,
+    ExecuteUniDac,
+    OpenZeus,
+    OpenFire,
+    OpenUniDac
+  );
 end;
 
 function TSQLQuery.CurrencyToString(NameField, Format: WideString): WideString;
@@ -272,6 +310,18 @@ begin
   Result := Self;
 end;
 
+function TSQLQuery.Execute(var Connection: TZConnection): TSqlQuery;
+begin
+  ExecuteZeusC( Connection );
+  Result := Self;
+end;
+
+function TSQLQuery.Execute(var Connection: TFDConnection): TSqlQuery;
+begin
+  ExecuteFireC( Connection );
+  Result := Self;
+end;
+
 procedure TSQLQuery.ExecuteFire(var Query: TFDQuery);
 var
   Executed : Boolean;
@@ -336,6 +386,185 @@ begin
     Query.EnableControls;
     Clear;
     FieldBlobClear;
+  end;
+end;
+
+procedure TSQLQuery.ExecuteFireC(var Connection: TFDConnection);
+var
+  Executed : Boolean;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
+        Connection.ExecSQL( GetString );
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          if PostGreSQL then
+          begin
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Connection.Connected := False;
+              Connection.Connected := True;
+            end
+            else raise;
+          end
+          else
+          begin
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Connection.Connected := False;
+              Connection.Connected := True;
+            end
+            else raise;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Clear;
+  end;
+end;
+
+procedure TSQLQuery.ExecuteUniDac(var Query: TUniQuery);
+var
+  Executed : Boolean;
+  I: Integer;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
+        Query.DisableControls;
+        Query.Close;
+        Query.SQL.Clear;
+        Query.SQL.Add( GetString );
+
+        for I := 0 to Self.FFieldBlob.Count -1 do
+          Query.Params.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
+
+        Query.ExecSQL;
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          if PostGreSQL then
+          begin
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Query.Connection.Connected := False;
+              Query.Connection.Connected := True;
+            end
+            else raise;
+          end
+          else
+          begin
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Query.Connection.Connected := False;
+              Query.Connection.Connected := True;
+            end
+            else raise;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Query.EnableControls;
+    Clear;
+    FieldBlobClear;
+  end;
+end;
+
+procedure TSQLQuery.ExecuteUniDacC(var Connection: TUniConnection);
+var
+  Executed : Boolean;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
+        Connection.ExecSQL( GetString );
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          if PostGreSQL then
+          begin
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Connection.Connected := False;
+              Connection.Connected := True;
+            end
+            else raise;
+          end
+          else
+          begin
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Connection.Connected := False;
+              Connection.Connected := True;
+            end
+            else raise;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Clear;
   end;
 end;
 
@@ -406,6 +635,62 @@ begin
   end;
 end;
 
+procedure TSQLQuery.ExecuteZeusC(var Connection: TZConnection);
+var
+  Executed : Boolean;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if LogSQL then
+          WriteLog( GetString );
+
+        Connection.ExecuteDirect( GetString );
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          if PostGreSQL then
+          begin
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Connection.Disconnect;
+              Connection.Connect;
+            end
+            else raise;
+          end
+          else
+          begin
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Connection.Disconnect;
+              Connection.Connect;
+            end
+            else raise;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Clear;
+  end;
+end;
+
 function TSqlQuery.Open(var query: TFDQuery): TSqlQuery;
 begin
   OpenFire( query );
@@ -415,6 +700,7 @@ end;
 procedure TSQLQuery.OpenFire(var query: TFDQuery);
 var
   Executed : Boolean;
+  I: Integer;
 begin
   Executed := False;
 
@@ -430,6 +716,10 @@ begin
         Query.Close;
         Query.SQL.Clear;
         Query.SQL.Add( GetString );
+
+        for I := 0 to Self.FFieldBlob.Count -1 do
+          Query.Params.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
+
         Query.Open;
 
         Self.FDataSet := Query.Fields.DataSet;
@@ -472,12 +762,14 @@ begin
   finally
     Query.EnableControls;
     Clear;
+    FieldBlobClear;
   end;
 end;
 
-procedure TSQLQuery.OpenZeus(var query: TZQuery);
+procedure TSQLQuery.OpenUniDac(var query: TUniQuery);
 var
   Executed : Boolean;
+  I: Integer;
 begin
   Executed := False;
 
@@ -493,6 +785,79 @@ begin
         Query.Close;
         Query.SQL.Clear;
         Query.SQL.Add( GetString );
+
+        for I := 0 to Self.FFieldBlob.Count -1 do
+          Query.Params.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
+
+        Query.Open;
+
+        Self.FDataSet := Query.Fields.DataSet;
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          if PostGreSQL then
+          begin
+            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+            begin
+              Query.Connection.Connected := False;
+              Query.Connection.Connected := True;
+            end
+            else raise;
+          end
+          else
+          begin
+            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+            begin
+              Query.Connection.Connected := False;
+              Query.Connection.Connected := True;
+            end
+            else raise;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Query.EnableControls;
+    Clear;
+    FieldBlobClear;
+  end;
+end;
+
+procedure TSQLQuery.OpenZeus(var query: TZQuery);
+var
+  Executed : Boolean;
+  I: Integer;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
+        Query.DisableControls;
+        Query.Close;
+        Query.SQL.Clear;
+        Query.SQL.Add( GetString );
+
+        for I := 0 to Self.FFieldBlob.Count -1 do
+          Query.Params.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
+
         Query.Open;
 
         Self.FDataSet := (Query as TDataSet);
@@ -535,6 +900,7 @@ begin
   finally
     Query.EnableControls;
     Clear;
+    FieldBlobClear;
   end;
 end;
 
@@ -644,14 +1010,6 @@ begin
   Result := Self;
 end;
 
-function TSQLQuery.SetField(Field: WideString; Value: Currency): TSQLQuery;
-begin
-  if Active then
-    Self.FDataSet.FieldByName( Field ).AsCurrency := Value;
-
-  Result := Self;
-end;
-
 function TSQLQuery.SetField(Field: WideString; Value: TDateTime): TSQLQuery;
 begin
   if Active then
@@ -714,7 +1072,7 @@ end;
 
 function TSQLQuery.getWideString(NameField: WideString): WideString;
 begin
-  Result := Self.FDataSet.FieldByName(NameField).AsWideString;
+  Result := Trim(Self.FDataSet.FieldByName(NameField).AsWideString);
 end;
 
 function TSQLQuery.FieldBlob(FieldName: WideString; FieldBlob: TMemoryStream): TSQLQuery;
@@ -819,9 +1177,9 @@ begin
   Result := Self.FDataSet.FieldByName(NameField).AsAnsiString;
 end;
 
-function TSQLQuery.getCurrency(NameField: WideString): Currency;
+function TSQLQuery.getCurrency(NameField: WideString): Double;
 begin
-  Result := Self.FDataSet.FieldByName(NameField).AsCurrency;
+  Result := Self.FDataSet.FieldByName(NameField).asFloat;
 end;
 
 function Ping(const AHost : string) : Boolean;
@@ -851,6 +1209,25 @@ begin
   finally
     FreeAndNil( MyIdIcmpClient );
   end;
+end;
+
+function TSQLQuery.Execute(var Query: TUniQuery): TSqlQuery;
+begin
+  ExecuteUniDac( Query );
+  Result := Self;
+
+end;
+
+function TSQLQuery.Execute(var Connection: TUniConnection): TSqlQuery;
+begin
+  ExecuteUniDacC( Connection );
+  Result := Self;
+end;
+
+function TSQLQuery.Open(var query: TUniQuery): TSqlQuery;
+begin
+  OpenUniDac( query );
+  Result := Self;
 end;
 
 { TBlobFieldsinSQL }
