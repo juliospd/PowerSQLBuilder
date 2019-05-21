@@ -354,23 +354,52 @@ begin
           if Self.FLogSQL then
             WriteLog( e.Message );
 
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          case SGDBType of
+            dbPostGreSQL:
             begin
-              Query.Connection.Connected := False;
-              Query.Connection.Connected := True;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMySQL:
             begin
-              Query.Connection.Connected := False;
-              Query.Connection.Connected := True;
-            end
-            else raise;
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
           end;
 
           Inc(Self.FFailCount);
@@ -412,23 +441,52 @@ begin
           if Self.FLogSQL then
             WriteLog( e.Message );
 
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          case SGDBType of
+            dbPostGreSQL:
             begin
-              Connection.Connected := False;
-              Connection.Connected := True;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMySQL:
             begin
-              Connection.Connected := False;
-              Connection.Connected := True;
-            end
-            else raise;
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
           end;
 
           Inc(Self.FFailCount);
@@ -477,23 +535,52 @@ begin
           if Self.FLogSQL then
             WriteLog( e.Message );
 
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          case SGDBType of
+            dbPostGreSQL:
             begin
-              Query.Connection.Connected := False;
-              Query.Connection.Connected := True;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMySQL:
             begin
-              Query.Connection.Connected := False;
-              Query.Connection.Connected := True;
-            end
-            else raise;
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
           end;
 
           Inc(Self.FFailCount);
@@ -535,23 +622,52 @@ begin
           if Self.FLogSQL then
             WriteLog( e.Message );
 
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          case SGDBType of
+            dbPostGreSQL:
             begin
-              Connection.Connected := False;
-              Connection.Connected := True;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMySQL:
             begin
-              Connection.Connected := False;
-              Connection.Connected := True;
-            end
-            else raise;
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
           end;
 
           Inc(Self.FFailCount);
@@ -600,23 +716,52 @@ begin
           if Self.FLogSQL then
             WriteLog( e.Message );
 
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          case SGDBType of
+            dbPostGreSQL:
             begin
-              Query.Connection.Disconnect;
-              Query.Connection.Connect;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
+            dbMySQL:
             begin
-              Query.Connection.Disconnect;
-              Query.Connection.Connect;
-            end
-            else raise;
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
           end;
 
           Inc(Self.FFailCount);
@@ -658,23 +803,52 @@ begin
           if Self.FLogSQL then
             WriteLog( e.Message );
 
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          case SGDBType of
+            dbPostGreSQL:
             begin
-              Connection.Disconnect;
-              Connection.Connect;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Disconnect;
+                Connection.Connect;
+              end
+              else raise;
+            end;
+            dbMySQL:
             begin
-              Connection.Disconnect;
-              Connection.Connect;
-            end
-            else raise;
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Connection.Disconnect;
+                Connection.Connect;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Disconnect;
+                Connection.Connect;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Disconnect;
+                Connection.Connect;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Disconnect;
+                Connection.Connect;
+              end
+              else raise;
+            end;
           end;
 
           Inc(Self.FFailCount);
@@ -731,23 +905,52 @@ begin
           if Self.FLogSQL then
             WriteLog( e.Message );
 
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          case SGDBType of
+            dbPostGreSQL:
             begin
-              Query.Connection.Connected := False;
-              Query.Connection.Connected := True;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMySQL:
             begin
-              Query.Connection.Connected := False;
-              Query.Connection.Connected := True;
-            end
-            else raise;
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
           end;
 
           Inc(Self.FFailCount);
@@ -800,23 +1003,52 @@ begin
           if Self.FLogSQL then
             WriteLog( e.Message );
 
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          case SGDBType of
+            dbPostGreSQL:
             begin
-              Query.Connection.Connected := False;
-              Query.Connection.Connected := True;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMySQL:
             begin
-              Query.Connection.Connected := False;
-              Query.Connection.Connected := True;
-            end
-            else raise;
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
           end;
 
           Inc(Self.FFailCount);
@@ -869,23 +1101,52 @@ begin
           if Self.FLogSQL then
             WriteLog( e.Message );
 
-          if PostGreSQL then
-          begin
-            if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+          case SGDBType of
+            dbPostGreSQL:
             begin
-              Query.Connection.Disconnect;
-              Query.Connection.Connect;
-            end
-            else raise;
-          end
-          else
-          begin
-            if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
+            dbMySQL:
             begin
-              Query.Connection.Disconnect;
-              Query.Connection.Connect;
-            end
-            else raise;
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
           end;
 
           Inc(Self.FFailCount);

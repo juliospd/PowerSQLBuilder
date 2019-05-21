@@ -53,6 +53,8 @@ type
   TOpenF = procedure (var query : TFDQuery ) of object;
   TOpenU = procedure (var query : TUniQuery ) of object;
 
+  TSGDBType = ( dbPostGreSQL, dbMySQL, dbMsSQL, dbFireBird, dbNenhum );
+
   /// <summary>
   ///   PowerSQLBuilder é uma classe de manipulação SQL
   /// </summary>
@@ -70,7 +72,7 @@ type
   TPowerSQLBuilder = class(TObject)
   private
     FValuePSB : TStringBuilder;
-    FPostGreSQL: Boolean;
+    FSGDBType: TSGDBType;
     FWhere : Boolean;
 
     FOpenFire: TOpenF;
@@ -92,11 +94,11 @@ type
     function TestOfDate( const Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function TestOfTime( const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = ''; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
 
-    procedure SetPostGreSQL(const Value: Boolean);
+    procedure SetSGDBType(const Value: TSGDBType);
   protected
     procedure SetFunctions( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; ExecuteFireC : TExecuteFc; ExecuteFire : TExecuteF; ExecuteUniDacC : TExecuteUc; ExecuteUniDac : TExecuteU; OpenZeus : TOpenZ; OpenFire : TOpenF; OpenUniDac : TOpenU );
   public
-    property PostGreSQL : Boolean read FPostGreSQL write SetPostGreSQL;
+    property SGDBType : TSGDBType read FSGDBType;
     // Funções simples
     function Add(const Value : WideString) : TPowerSQLBuilder; virtual;
     function AddQuoted(const Value : WideString) : TPowerSQLBuilder; virtual;
@@ -289,6 +291,10 @@ type
     function Open(var query : TZQuery ) : TPowerSQLBuilder; overload;
     function Open(var query : TFDQuery ) : TPowerSQLBuilder; overload;
     function Open(var query : TUniQuery ) : TPowerSQLBuilder; overload;
+    function PostGreSQL : TPowerSQLBuilder;
+    function FireBird : TPowerSQLBuilder;
+    function MSSQL : TPowerSQLBuilder;
+    function MySQL : TPowerSQLBuilder;
 
     constructor Create; virtual;
     destructor Destroy; override;
@@ -530,6 +536,7 @@ end;
 constructor TPowerSQLBuilder.Create;
 begin
   Self.FValuePSB := TStringBuilder.Create;
+  Self.FSGDBType := dbNenhum;
 end;
 
 function TPowerSQLBuilder.Desc: TPowerSQLBuilder;
@@ -690,19 +697,42 @@ begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd hh:nn:ss';
 
-  if Self.FPostGreSQL then
-  begin
-    if DateOf(Value) = 0 then
-      Add('null')
-    else
-      Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-  end
-  else
-  begin
-    if DateOf(Value) = 0 then
-      Add( QuotedStr( '0000.00.00 00:00:00' ) )
-    else
-      Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+  case Self.FSGDBType of
+    dbPostGreSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMySQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add( QuotedStr( '0000.00.00 00:00:00' ) )
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMsSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbFireBird:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbNenhum:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
   end;
 
   Result := Self;
@@ -715,10 +745,13 @@ end;
 
 function TPowerSQLBuilder.Field(const Value: Boolean): TPowerSQLBuilder;
 begin
-  if Self.FPostGreSQL then
-    Add( IfThen(Value, 'true', 'false') )
-  else
-    Add( IfThen(Value, '1', '0') );
+  case Self.FSGDBType of
+    dbPostGreSQL: Add( IfThen(Value, 'true', 'false') );
+    dbMySQL: Add( IfThen(Value, '1', '0') );
+    dbMsSQL: Add( IfThen(Value, 'true', 'false') );
+    dbFireBird: Add( IfThen(Value, 'true', 'false') );
+    dbNenhum: Add( IfThen(Value, 'true', 'false') );
+  end;
 
   Result := Self;
 end;
@@ -738,19 +771,42 @@ begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd';
 
-  if Self.FPostGreSQL then
-  begin
-    if DateOf(Value) = 0 then
-      Add('null')
-    else
-      Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
-  end
-  else
-  begin
-    if DateOf(Value) = 0 then
-      Add( QuotedStr( '0000.00.00' ) )
-    else
-      Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+  case Self.FSGDBType of
+    dbPostGreSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
+    end;
+    dbMySQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add( QuotedStr( '0000.00.00' ) )
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMsSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
+    end;
+    dbFireBird:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
+    end;
+    dbNenhum:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
+    end;
   end;
 
   Result := Self;
@@ -766,24 +822,47 @@ begin
       Mask := 'hh:mm'
   end;
 
-  if Self.FPostGreSQL then
-  begin
-    if DateOf(Value) = 0 then
-      Add('null')
-    else
-      Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
-  end
-  else
-  begin
-    if DateOf(Value) = 0 then
+  case Self.FSGDBType of
+    dbPostGreSQL:
     begin
-      if Seconds then
-        Add( QuotedStr( '00:00:00' ) )
+      if DateOf(Value) = 0 then
+        Add('null')
       else
-        Add( QuotedStr( '00:00' ) )
-    end
-    else
-      Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+    end;
+    dbMySQL:
+    begin
+      if DateOf(Value) = 0 then
+      begin
+        if Seconds then
+          Add( QuotedStr( '00:00:00' ) )
+        else
+          Add( QuotedStr( '00:00' ) )
+      end
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMsSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+    end;
+    dbFireBird:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+    end;
+    dbNenhum:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+    end;
   end;
 
   Result := Self;
@@ -807,6 +886,12 @@ end;
 function TPowerSQLBuilder.FieldsStart( const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' (').Add( Value );
+end;
+
+function TPowerSQLBuilder.FireBird: TPowerSQLBuilder;
+begin
+  Self.FSGDBType := dbFireBird;
+  Result := Self;
 end;
 
 function TPowerSQLBuilder.From: TPowerSQLBuilder;
@@ -835,7 +920,7 @@ var
 begin
   Result := '';
 
-  if not Self.FPostGreSQL then
+  if Self.FSGDBType <> dbPostGreSQL then
     Exit;
 
   SqlFreeze := GetString;
@@ -1106,6 +1191,18 @@ begin
   Result := TestOfTime( Value, Seconds, '<', Mask);
 end;
 
+function TPowerSQLBuilder.MSSQL: TPowerSQLBuilder;
+begin
+  Self.FSGDBType := dbMsSQL;
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.MySQL: TPowerSQLBuilder;
+begin
+  Self.FSGDBType := dbMySQL;
+  Result := Self;
+end;
+
 function TPowerSQLBuilder.Next: TPowerSQLBuilder;
 begin
   Result := Add(', ');
@@ -1134,6 +1231,12 @@ end;
 function TPowerSQLBuilder.Order_By( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add(' order by ').Add( Value );
+end;
+
+function TPowerSQLBuilder.PostGreSQL: TPowerSQLBuilder;
+begin
+  Self.FSGDBType := dbPostGreSQL;
+  Result := Self;
 end;
 
 function TPowerSQLBuilder.Returning(Field: WideString): TPowerSQLBuilder;
@@ -1187,9 +1290,9 @@ begin
   Self.FOpenUniDac := OpenUniDac;
 end;
 
-procedure TPowerSQLBuilder.SetPostGreSQL(const Value: Boolean);
+procedure TPowerSQLBuilder.SetSGDBType(const Value: TSGDBType);
 begin
-  FPostGreSQL := Value;
+  FSGDBType := Value;
 end;
 
 function TPowerSQLBuilder.sP: TPowerSQLBuilder;
@@ -1222,30 +1325,55 @@ begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd hh:nn:ss';
 
-  if Self.FPostGreSQL then
-  begin
-    if DateOf(Value) = 0 then
-      Add(' ').Add( Condition ).Add(' ').Add('null')
-    else
-      Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-  end
-  else
-  begin
-    if DateOf(Value) = 0 then
-      Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( '0000.00.00 00:00:00' ) )
-    else
-      Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-  end;
 
-  Result := Self;
+  case Self.FSGDBType of
+    dbPostGreSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMySQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add( QuotedStr( '0000.00.00 00:00:00' ) )
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMsSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbFireBird:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbNenhum:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+  end;
 end;
 
 function TPowerSQLBuilder.Test(const Value: Boolean;Condition: WideString): TPowerSQLBuilder;
 begin
-  if Self.FPostGreSQL then
-    Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') )
-  else
-    Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
+  case Self.FSGDBType of
+    dbPostGreSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
+    dbMySQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
+    dbMsSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
+    dbFireBird: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
+    dbNenhum: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
+  end;
 
   Result := Self;
 end;
@@ -1273,19 +1401,42 @@ begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd';
 
-  if Self.FPostGreSQL then
-  begin
-    if DateOf(Value) = 0 then
-      Add(' ').Add( Condition ).Add(' ').Add('null')
-    else
-      Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-  end
-  else
-  begin
-    if DateOf(Value) = 0 then
-      Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( '0000.00.00' ) )
-    else
-      Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+  case Self.FSGDBType of
+    dbPostGreSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMySQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add( QuotedStr( '0000.00.00 00:00:00' ) )
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMsSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbFireBird:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbNenhum:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
   end;
 
   Result := Self;
@@ -1301,24 +1452,47 @@ begin
       Mask := 'hh:mm';
   end;
 
-  if Self.FPostGreSQL then
-  begin
-    if DateOf(Value) = 0 then
-      Add(' ').Add( Condition ).Add(' ').Add('null')
-    else
-      Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
-  end
-  else
-  begin
-    if DateOf(Value) = 0 then
+  case Self.FSGDBType of
+    dbPostGreSQL:
     begin
-      if Seconds then
-        Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( '00:00:00' ) )
+      if DateOf(Value) = 0 then
+        Add('null')
       else
-        Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( '00:00' ) )
-    end
-    else
-      Add(' ').Add( Condition ).Add(' ').Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+    end;
+    dbMySQL:
+    begin
+      if DateOf(Value) = 0 then
+      begin
+        if Seconds then
+          Add( QuotedStr( '00:00:00' ) )
+        else
+          Add( QuotedStr( '00:00' ) )
+      end
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMsSQL:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+    end;
+    dbFireBird:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+    end;
+    dbNenhum:
+    begin
+      if DateOf(Value) = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+    end;
   end;
 
   Result := Self;
