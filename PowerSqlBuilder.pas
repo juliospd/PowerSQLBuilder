@@ -93,8 +93,6 @@ type
     function TestDate( const Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
     function TestOfDate( const Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function TestOfTime( const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = ''; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-
-    procedure SetSGDBType(const Value: TSGDBType);
   protected
     procedure SetFunctions( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; ExecuteFireC : TExecuteFc; ExecuteFire : TExecuteF; ExecuteUniDacC : TExecuteUc; ExecuteUniDac : TExecuteU; OpenZeus : TOpenZ; OpenFire : TOpenF; OpenUniDac : TOpenU );
   public
@@ -1288,11 +1286,6 @@ begin
   Self.FOpenFire := OpenFire;
   Self.FOpenZeus := OpenZeus;
   Self.FOpenUniDac := OpenUniDac;
-end;
-
-procedure TPowerSQLBuilder.SetSGDBType(const Value: TSGDBType);
-begin
-  FSGDBType := Value;
 end;
 
 function TPowerSQLBuilder.sP: TPowerSQLBuilder;
