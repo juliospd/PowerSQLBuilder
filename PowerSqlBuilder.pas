@@ -1318,6 +1318,7 @@ begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd hh:nn:ss';
 
+  Add(' ').Add( Condition ).Add(' ');
 
   case Self.FSGDBType of
     dbPostGreSQL:
@@ -1356,6 +1357,8 @@ begin
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
   end;
+
+  Result := Self;
 end;
 
 function TPowerSQLBuilder.Test(const Value: Boolean;Condition: WideString): TPowerSQLBuilder;
@@ -1393,6 +1396,8 @@ function TPowerSQLBuilder.TestOfDate(const Value: TDateTime;Condition: WideStrin
 begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd';
+
+  Add(' ').Add( Condition ).Add(' ');
 
   case Self.FSGDBType of
     dbPostGreSQL:
@@ -1444,6 +1449,8 @@ begin
     else
       Mask := 'hh:mm';
   end;
+
+  Add(' ').Add( Condition ).Add(' ');
 
   case Self.FSGDBType of
     dbPostGreSQL:
