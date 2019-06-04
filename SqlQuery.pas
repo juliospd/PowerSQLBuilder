@@ -39,6 +39,8 @@ uses
   FireDAC.Comp.UI, FireDAC.Phys.PG, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
   System.Generics.Defaults, System.Generics.Collections,
   IdBaseComponent, IdComponent, IdRawBase, IdRawClient, IdIcmpClient,
+  {ADO}
+  Data.Win.ADODB,
   {UniDac}
   MemDS, DBAccess, Uni;
 
@@ -89,9 +91,13 @@ type
     procedure ExecuteUniDacC(var Connection : TUniConnection );
     procedure ExecuteUniDac(var Query : TUniQuery );
 
+    procedure ExecuteADOC(var Connection : TADOConnection );
+    procedure ExecuteADO(var Query : TADOQuery );
+
     procedure OpenZeus(var query : TZQuery );
     procedure OpenFire(var query : TFDQuery );
     procedure OpenUniDac(var query : TUniQuery );
+    procedure OpenADO(var query : TADOQuery );
 
     procedure FieldBlobClear;
     procedure WriteLog( Log : WideString );
@@ -110,13 +116,17 @@ type
     function Execute(var Query : TZQuery ) : TSqlQuery; overload;
     function Execute(var Query : TFDQuery ) : TSqlQuery; overload;
     function Execute(var Query : TUniQuery ) : TSqlQuery; overload;
+    function Execute(var Query : TADOQuery ) : TSqlQuery; overload;
+
     function Execute(var Connection : TZConnection ) : TSqlQuery; overload;
     function Execute(var Connection : TFDConnection ) : TSqlQuery; overload;
     function Execute(var Connection : TUniConnection ) : TSqlQuery; overload;
+    function Execute(var Connection : TADOConnection ) : TSqlQuery; overload;
 
     function Open(var query : TZQuery ) : TSqlQuery; overload;
     function Open(var query : TFDQuery ) : TSqlQuery; overload;
     function Open(var query : TUniQuery ) : TSqlQuery; overload;
+    function Open(var query : TADOQuery ) : TSqlQuery; overload;
 
     // Atalhos do DataSet
     function RecordCount : Integer;
@@ -222,18 +232,10 @@ begin
   inherited Create;
   Self.FFieldBlob := TList<TBlobFieldsinSQL>.Create;
 
-  SetFunctions
-  (
-    ExecuteZeusC,
-    ExecuteZeus,
-    ExecuteFireC,
-    ExecuteFire,
-    ExecuteUniDacC,
-    ExecuteUniDac,
-    OpenZeus,
-    OpenFire,
-    OpenUniDac
-  );
+  SetZeus( ExecuteZeusC, ExecuteZeus, OpenZeus );
+  SetFireDac( ExecuteFireC, ExecuteFire, OpenFire );
+  SetUniDac( ExecuteUniDacC, ExecuteUniDac, OpenUniDac );
+  SetADO( ExecuteADOC, ExecuteADO, OpenADO );
 end;
 
 function TSQLQuery.CurrencyToString(NameField, Format: WideString): WideString;
@@ -1476,7 +1478,6 @@ function TSQLQuery.Execute(var Query: TUniQuery): TSqlQuery;
 begin
   ExecuteUniDac( Query );
   Result := Self;
-
 end;
 
 function TSQLQuery.Execute(var Connection: TUniConnection): TSqlQuery;
@@ -1485,10 +1486,308 @@ begin
   Result := Self;
 end;
 
+procedure TSQLQuery.ExecuteADO(var Query: TADOQuery);
+var
+  Executed : Boolean;
+  I: Integer;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
+        Query.DisableControls;
+        Query.Close;
+        Query.SQL.Clear;
+        Query.SQL.Add( GetString );
+
+        for I := 0 to Self.FFieldBlob.Count -1 do
+          Query.Parameters.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
+
+        Query.ExecSQL;
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          case SGDBType of
+            dbPostGreSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMySQL:
+            begin
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Query.EnableControls;
+    Clear;
+    FieldBlobClear;
+  end;
+end;
+
+procedure TSQLQuery.ExecuteADOC(var Connection: TADOConnection);
+var
+  Executed : Boolean;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
+        Connection.Execute( GetString );
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          case SGDBType of
+            dbPostGreSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMySQL:
+            begin
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Clear;
+  end;
+end;
+
 function TSQLQuery.Open(var query: TUniQuery): TSqlQuery;
 begin
   OpenUniDac( query );
   Result := Self;
+end;
+
+function TSQLQuery.Execute(var Connection: TADOConnection): TSqlQuery;
+begin
+  ExecuteADOC( Connection );
+  Result := Self;
+end;
+
+function TSQLQuery.Execute(var Query: TADOQuery): TSqlQuery;
+begin
+  ExecuteADO( Query );
+  Result := Self;
+end;
+
+function TSQLQuery.Open(var query: TADOQuery): TSqlQuery;
+begin
+  OpenADO( query );
+  Result := Self;
+end;
+
+procedure TSQLQuery.OpenADO(var query: TADOQuery);
+var
+  Executed : Boolean;
+  I: Integer;
+begin
+  Executed := False;
+
+  try
+    Self.FFailCount := 0;
+
+    repeat
+      try
+        if Self.FLogSQL then
+          WriteLog( GetString );
+
+        Query.DisableControls;
+        Query.Close;
+        Query.SQL.Clear;
+        Query.SQL.Add( GetString );
+
+        for I := 0 to Self.FFieldBlob.Count -1 do
+          Query.Parameters.ParamByName( Self.FFieldBlob[I].FieldName ).LoadFromStream( Self.FFieldBlob[I].FFieldBlob, ftBlob );
+
+        Query.Open;
+
+        Self.FDataSet := Query.Fields.DataSet;
+
+        Executed := True;
+      except
+        on e: Exception do
+        begin
+          if Self.FLogSQL then
+            WriteLog( e.Message );
+
+          case SGDBType of
+            dbPostGreSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMySQL:
+            begin
+              if Pos( 'MySQL server has gone away' , e.Message ) > 0  then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbMsSQL:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbNenhum:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+          end;
+
+          Inc(Self.FFailCount);
+
+          Executed := (Self.FFailCount > 3);
+
+          if Executed then
+            raise;
+        end;
+      end;
+    until (Executed);
+  finally
+    Query.EnableControls;
+    Clear;
+    FieldBlobClear;
+  end;
+
 end;
 
 { TBlobFieldsinSQL }

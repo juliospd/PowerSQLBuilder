@@ -36,6 +36,8 @@ uses
   FireDAC.Stan.Async, FireDAC.Phys, FireDAC.Stan.Param, FireDAC.DatS,
   FireDAC.DApt.Intf,FireDAC.DApt, FireDAC.Phys.PGDef, FireDAC.VCLUI.Wait,
   FireDAC.Comp.UI, FireDAC.Phys.PG, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
+  {ADO}
+  Data.Win.ADODB,
   {UniDac}
   MemDS, DBAccess, Uni;
 
@@ -49,9 +51,13 @@ type
   TExecuteUc = procedure (var Connection : TUniConnection ) of object;
   TExecuteU = procedure (var Query : TUniQuery ) of object;
 
+  TExecuteAc = procedure (var Connection : TADOConnection ) of object;
+  TExecuteA = procedure (var Query : TADOQuery ) of object;
+
   TOpenZ = procedure (var query : TZQuery ) of object;
   TOpenF = procedure (var query : TFDQuery ) of object;
   TOpenU = procedure (var query : TUniQuery ) of object;
+  TOpenA = procedure (var query : TADOQuery ) of object;
 
   TSGDBType = ( dbPostGreSQL, dbMySQL, dbMsSQL, dbFireBird, dbNenhum );
 
@@ -78,12 +84,15 @@ type
     FOpenFire: TOpenF;
     FOpenZeus: TOpenZ;
     FOpenUniDac : TOpenU;
+    FOpenADO : TOpenA;
     FExecuteFire: TExecuteF;
     FExecuteZeus: TExecuteZ;
     FExecuteUniDac: TExecuteU;
+    FExecuteADO: TExecuteA;
     FExecuteZeusC: TExecuteZc;
     FExecuteFireC: TExecuteFc;
     FExecuteUniDacC: TExecuteUc;
+    FExecuteADOC: TExecuteAc;
 
     function Test( const Value : WideString; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Test( const Value : Double; DecimalValue : ShortInt = 2; Condition : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
@@ -94,7 +103,10 @@ type
     function TestOfDate( const Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function TestOfTime( const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = ''; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
   protected
-    procedure SetFunctions( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; ExecuteFireC : TExecuteFc; ExecuteFire : TExecuteF; ExecuteUniDacC : TExecuteUc; ExecuteUniDac : TExecuteU; OpenZeus : TOpenZ; OpenFire : TOpenF; OpenUniDac : TOpenU );
+    procedure SetZeus( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; OpenZeus : TOpenZ );
+    procedure SetFireDac( ExecuteFireC : TExecuteFc; ExecuteFire : TExecuteF; OpenFire : TOpenF );
+    procedure SetUniDac( ExecuteUniDacC : TExecuteUc; ExecuteUniDac : TExecuteU; OpenUniDac : TOpenU );
+    procedure SetADO( ExecuteADOC : TExecuteAc; ExecuteADO : TExecuteA; OpenADO : TOpenA );
   public
     property SGDBType : TSGDBType read FSGDBType;
     // Funções simples
@@ -286,9 +298,12 @@ type
     function Execute(var Query : TFDQuery ) : TPowerSQLBuilder; overload;
     function Execute(var Connection : TUniConnection ) : TPowerSQLBuilder; overload;
     function Execute(var Query : TUniQuery ) : TPowerSQLBuilder; overload;
+    function Execute(var Connection : TADOConnection ) : TPowerSQLBuilder; overload;
+    function Execute(var Query : TADOQuery ) : TPowerSQLBuilder; overload;
     function Open(var query : TZQuery ) : TPowerSQLBuilder; overload;
     function Open(var query : TFDQuery ) : TPowerSQLBuilder; overload;
     function Open(var query : TUniQuery ) : TPowerSQLBuilder; overload;
+    function Open(var query : TADOQuery ) : TPowerSQLBuilder; overload;
     function PostGreSQL : TPowerSQLBuilder;
     function FireBird : TPowerSQLBuilder;
     function MSSQL : TPowerSQLBuilder;
@@ -305,6 +320,14 @@ implementation
 function TPowerSQLBuilder.&ON(const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' on (').Add( Value ).EndValues;
+end;
+
+function TPowerSQLBuilder.Open(var query: TADOQuery): TPowerSQLBuilder;
+begin
+  if Assigned( Self.FOpenADO ) then
+    Self.FOpenADO( Query );
+
+  Result := Self;
 end;
 
 function TPowerSQLBuilder.Open(var query: TFDQuery): TPowerSQLBuilder;
@@ -656,6 +679,17 @@ end;
 function TPowerSQLBuilder.EqualOfTime(const Value: TDateTime; Seconds : Boolean; Mask : WideString): TPowerSQLBuilder;
 begin
   Result := TestOfTime( Value, Seconds, '=', Mask );
+end;
+
+function TPowerSQLBuilder.Execute(
+  var Connection: TADOConnection): TPowerSQLBuilder;
+begin
+
+end;
+
+function TPowerSQLBuilder.Execute(var Query: TADOQuery): TPowerSQLBuilder;
+begin
+
 end;
 
 function TPowerSQLBuilder.Execute(var Connection: TZConnection): TPowerSQLBuilder;
@@ -1272,20 +1306,32 @@ begin
   Result := Add('select * from ').Add( Value );
 end;
 
-procedure TPowerSQLBuilder.SetFunctions( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; ExecuteFireC : TExecuteFc; ExecuteFire : TExecuteF; ExecuteUniDacC : TExecuteUc; ExecuteUniDac : TExecuteU; OpenZeus : TOpenZ; OpenFire : TOpenF; OpenUniDac : TOpenU );
+procedure TPowerSQLBuilder.SetADO(ExecuteADOC: TExecuteAc; ExecuteADO: TExecuteA; OpenADO: TOpenA);
 begin
-  Self.FExecuteFireC := ExecuteFireC;
-  Self.FExecuteFire := ExecuteFire;
+  Self.FExecuteADOC    := ExecuteADOC;
+  Self.FExecuteADO     := ExecuteADO;
+  Self.FOpenADO        := OpenADO;
+end;
 
-  Self.FExecuteZeusC := ExecuteZeusC;
-  Self.FExecuteZeus := ExecuteZeus;
+procedure TPowerSQLBuilder.SetFireDac(ExecuteFireC: TExecuteFc; ExecuteFire: TExecuteF; OpenFire: TOpenF);
+begin
+  Self.FExecuteFireC   := ExecuteFireC;
+  Self.FExecuteFire    := ExecuteFire;
+  Self.FOpenFire       := OpenFire;
+end;
 
+procedure TPowerSQLBuilder.SetUniDac(ExecuteUniDacC: TExecuteUc; ExecuteUniDac: TExecuteU; OpenUniDac: TOpenU);
+begin
   Self.FExecuteUniDacC := ExecuteUniDacC;
-  Self.FExecuteUniDac := ExecuteUniDac;
+  Self.FExecuteUniDac  := ExecuteUniDac;
+  Self.FOpenUniDac     := OpenUniDac;
+end;
 
-  Self.FOpenFire := OpenFire;
-  Self.FOpenZeus := OpenZeus;
-  Self.FOpenUniDac := OpenUniDac;
+procedure TPowerSQLBuilder.SetZeus(ExecuteZeusC: TExecuteZc; ExecuteZeus: TExecuteZ; OpenZeus: TOpenZ);
+begin
+  Self.FExecuteZeusC   := ExecuteZeusC;
+  Self.FExecuteZeus    := ExecuteZeus;
+  Self.FOpenZeus       := OpenZeus;
 end;
 
 function TPowerSQLBuilder.sP: TPowerSQLBuilder;
