@@ -232,6 +232,7 @@ type
     function InnerJoin : TPowerSQLBuilder; overload; virtual;
     function FullJoin( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function FullJoin : TPowerSQLBuilder; overload; virtual;
+    function Top( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Limit( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Limit( const pag1, pag2 : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Like( const Value : WideString ) : TPowerSQLBuilder; virtual;
@@ -449,6 +450,11 @@ end;
 function TPowerSQLBuilder.&Then(Value: Boolean): TPowerSQLBuilder;
 begin
   Result := Add(' then ').Field( Value );
+end;
+
+function TPowerSQLBuilder.Top(const Value: Integer): TPowerSQLBuilder;
+begin
+  Result := Add(' TOP ').Field(Value);
 end;
 
 function TPowerSQLBuilder.&Then(Value: WideString): TPowerSQLBuilder;
@@ -681,15 +687,20 @@ begin
   Result := TestOfTime( Value, Seconds, '=', Mask );
 end;
 
-function TPowerSQLBuilder.Execute(
-  var Connection: TADOConnection): TPowerSQLBuilder;
+function TPowerSQLBuilder.Execute(var Connection: TADOConnection): TPowerSQLBuilder;
 begin
+  if Assigned( Self.FExecuteADOC ) then
+    Self.FExecuteADOC( Connection );
 
+  Result := Self;
 end;
 
 function TPowerSQLBuilder.Execute(var Query: TADOQuery): TPowerSQLBuilder;
 begin
+  if Assigned( Self.FExecuteADO ) then
+    Self.FExecuteADO( Query );
 
+  Result := Self;
 end;
 
 function TPowerSQLBuilder.Execute(var Connection: TZConnection): TPowerSQLBuilder;
@@ -780,7 +791,7 @@ begin
   case Self.FSGDBType of
     dbPostGreSQL: Add( IfThen(Value, 'true', 'false') );
     dbMySQL: Add( IfThen(Value, '1', '0') );
-    dbMsSQL: Add( IfThen(Value, 'true', 'false') );
+    dbMsSQL: Add( IfThen(Value, '1', '0') );
     dbFireBird: Add( IfThen(Value, 'true', 'false') );
     dbNenhum: Add( IfThen(Value, 'true', 'false') );
   end;
@@ -1412,7 +1423,7 @@ begin
   case Self.FSGDBType of
     dbPostGreSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
     dbMySQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
-    dbMsSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
+    dbMsSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
     dbFireBird: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
     dbNenhum: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
   end;
