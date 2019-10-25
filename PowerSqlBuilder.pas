@@ -99,8 +99,8 @@ type
     function Test( const Value : Int64; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Test( const Value : Integer; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Test( const Value : Boolean; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function TestDate( const Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
-    function TestOfDate( const Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function TestDate(Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function TestOfDate(Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function TestOfTime( const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = ''; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
   protected
     procedure SetZeus( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; OpenZeus : TOpenZ );
@@ -172,12 +172,12 @@ type
     // Field usado na inserção
     function Field( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function Field( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Field(Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function FieldFloat( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; virtual;
-    function FieldOfDate( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function FieldOfDate(Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function FieldOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     // Campo e valor usado no Update
     function UpField( Field : WideString; const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
@@ -258,6 +258,7 @@ type
     function AutoIncrement(const Value : Integer ) : TPowerSQLBuilder; virtual;
     function EndIn : TPowerSQLBuilder; virtual;
     function Returning( Field : WideString ) : TPowerSQLBuilder; virtual;
+    function OutPut( Field : WideString ) : TPowerSQLBuilder; virtual;
     //
     function Empty : TPowerSQLBuilder; virtual;
     function &Is : TPowerSQLBuilder; virtual;
@@ -305,6 +306,7 @@ type
     function Open(var query : TFDQuery ) : TPowerSQLBuilder; overload;
     function Open(var query : TUniQuery ) : TPowerSQLBuilder; overload;
     function Open(var query : TADOQuery ) : TPowerSQLBuilder; overload;
+
     function PostGreSQL : TPowerSQLBuilder;
     function FireBird : TPowerSQLBuilder;
     function MSSQL : TPowerSQLBuilder;
@@ -735,10 +737,13 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.Field(const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.Field(Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
 begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd hh:nn:ss';
+
+  if YearOf(Value) < 1890 then
+    Value := 0;
 
   case Self.FSGDBType of
     dbPostGreSQL:
@@ -809,10 +814,13 @@ begin
   Result := Add( IntToStr( Value ) );
 end;
 
-function TPowerSQLBuilder.FieldOfDate(const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.FieldOfDate(Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
 begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd';
+
+  if YearOf(Value) < 1890 then
+    Value := 0;
 
   case Self.FSGDBType of
     dbPostGreSQL:
@@ -1276,6 +1284,11 @@ begin
   Result := Add(' order by ').Add( Value );
 end;
 
+function TPowerSQLBuilder.OutPut(Field: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' output inserted.').Add(Trim(Field)).Add(' ');
+end;
+
 function TPowerSQLBuilder.PostGreSQL: TPowerSQLBuilder;
 begin
   Self.FSGDBType := dbPostGreSQL;
@@ -1370,12 +1383,15 @@ begin
   Result := Add(' ').Add( Condition ).Add(' ').Add( IntToStr( Value ) );
 end;
 
-function TPowerSQLBuilder.TestDate(const Value: TDateTime;Condition: WideString; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.TestDate(Value: TDateTime;Condition: WideString; Mask : WideString): TPowerSQLBuilder;
 begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd hh:nn:ss';
 
   Add(' ').Add( Condition ).Add(' ');
+
+  if YearOf(Value) < 1890 then
+    Value := 0;
 
   case Self.FSGDBType of
     dbPostGreSQL:
@@ -1449,12 +1465,15 @@ begin
   Result := Add(' ').Add( Condition ).Add(' ').Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
 end;
 
-function TPowerSQLBuilder.TestOfDate(const Value: TDateTime;Condition: WideString; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.TestOfDate(Value: TDateTime;Condition: WideString; Mask : WideString): TPowerSQLBuilder;
 begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd';
 
   Add(' ').Add( Condition ).Add(' ');
+
+  if YearOf(Value) < 1890 then
+    Value := 0;
 
   case Self.FSGDBType of
     dbPostGreSQL:
