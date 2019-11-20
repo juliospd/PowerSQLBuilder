@@ -186,6 +186,7 @@ type
     function UpField( Field : WideString; const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
+    function UpFieldNull(Field: WideString): TPowerSQLBuilder;
     function UpFieldOfDate( Field : WideString; const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function UpFieldOfTime( Field : WideString; const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     // Power SQL
@@ -259,6 +260,7 @@ type
     function EndIn : TPowerSQLBuilder; virtual;
     function Returning( Field : WideString ) : TPowerSQLBuilder; virtual;
     function OutPut( Field : WideString ) : TPowerSQLBuilder; virtual;
+    function OutPutField( Field : WideString ) : TPowerSQLBuilder; virtual;
     //
     function Empty : TPowerSQLBuilder; virtual;
     function &Is : TPowerSQLBuilder; virtual;
@@ -960,7 +962,7 @@ begin
   Result := AddQuoted(Value);
 end;
 
-function TPowerSQLBuilder.Field(const Value: Double; DecimalValue : ShortInt): TPowerSQLBuilder;
+function TPowerSQLBuilder.Field(const Value: Double; DecimalValue : ShortInt = 2): TPowerSQLBuilder;
 begin
   Result := Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
 end;
@@ -1289,6 +1291,12 @@ begin
   Result := Add(' output inserted.').Add(Trim(Field)).Add(' ');
 end;
 
+
+function TPowerSQLBuilder.OutPutField(Field: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(', inserted.').Add(Trim(Field)).Add(' ');
+end;
+
 function TPowerSQLBuilder.PostGreSQL: TPowerSQLBuilder;
 begin
   Self.FSGDBType := dbPostGreSQL;
@@ -1613,6 +1621,12 @@ function TPowerSQLBuilder.UpField(Field: WideString; const Value: TDateTime; Mas
 begin
   Result := Add(' ').Add( Field ).Equal( Value, Mask );
 end;
+
+function TPowerSQLBuilder.UpFieldNull(Field: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' ').Add( Field +' = null ' );
+end;
+
 
 function TPowerSQLBuilder.UpFieldOfDate(Field: WideString; const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
 begin
