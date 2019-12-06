@@ -217,6 +217,7 @@ type
     function Sum( const Value : WideString ) : TPowerSQLBuilder;  overload; virtual;
     function SumAs( const Value : WideString; asValue : WideString ) : TPowerSQLBuilder; virtual;
     function having( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function DropTable( const Value : WideString ) : TPowerSQLBuilder; virtual;
     /// <summary>
     /// sP : Abre um Parentese Start Parent '('
     /// </summary>
@@ -293,6 +294,10 @@ type
     function &Else( Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function &End( Name : WideString ) : TPowerSQLBuilder; overload; virtual;
     function &End : TPowerSQLBuilder; overload; virtual;
+    function &AddColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &DropColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &AlterColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &ModifyColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
 
     function GetJson( var Query : TZQuery; NameArray : WideString ) : WideString; overload;
 
@@ -497,6 +502,11 @@ begin
   Result := Self;
 end;
 
+function TPowerSQLBuilder.AddColumn( const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' add ').Add( Value );
+end;
+
 function TPowerSQLBuilder.AddLine(const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add( Value ).Add( #10 );
@@ -505,6 +515,11 @@ end;
 function TPowerSQLBuilder.AddQuoted( const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add( QuotedStr( Value ) );
+end;
+
+function TPowerSQLBuilder.AlterColumn( const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' alter column ').Add( Value );
 end;
 
 function TPowerSQLBuilder.AlterTable(const Value: WideString): TPowerSQLBuilder;
@@ -624,6 +639,16 @@ end;
 function TPowerSQLBuilder.Distinct(const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' Distinct ').Add( Value );
+end;
+
+function TPowerSQLBuilder.DropColumn( const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' drop column ').Add( Value );
+end;
+
+function TPowerSQLBuilder.DropTable(const Value : WideString ): TPowerSQLBuilder;
+begin
+  Result := Add(' drop table ').Add( Value );
 end;
 
 function TPowerSQLBuilder.Distinct: TPowerSQLBuilder;
@@ -1242,6 +1267,11 @@ end;
 function TPowerSQLBuilder.MinorOfTime(const Value: TDateTime;Seconds: Boolean; Mask : WideString): TPowerSQLBuilder;
 begin
   Result := TestOfTime( Value, Seconds, '<', Mask);
+end;
+
+function TPowerSQLBuilder.ModifyColumn( const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' modify column ').Add( Value );
 end;
 
 function TPowerSQLBuilder.MSSQL: TPowerSQLBuilder;
