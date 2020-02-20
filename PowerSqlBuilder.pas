@@ -180,6 +180,7 @@ type
     function FieldOfDate( Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function FieldOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     // Campo e valor usado no Update
+    function UpField( Field : WideString ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
@@ -294,6 +295,7 @@ type
     function &Case : TPowerSQLBuilder; overload; virtual;
     function &When( Condition : WideString )  : TPowerSQLBuilder; overload; virtual;
     function &When  : TPowerSQLBuilder; overload; virtual;
+    function &Then  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : WideString )  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : Double; DecimalValue : ShortInt = 2 )  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : TDateTime; Mask : WideString = ''  )  : TPowerSQLBuilder; overload; virtual;
@@ -459,6 +461,11 @@ end;
 function TPowerSQLBuilder.&End(Name: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' end').&As( Name );
+end;
+
+function TPowerSQLBuilder.&Then: TPowerSQLBuilder;
+begin
+  Result := Add(' then ');
 end;
 
 function TPowerSQLBuilder.&Then(Value: Int64): TPowerSQLBuilder;
@@ -1695,6 +1702,11 @@ end;
 function TPowerSQLBuilder.UpField(Field: WideString; const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Equal( Value, Mask );
+end;
+
+function TPowerSQLBuilder.UpField(Field: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' ').Add( Field ).Add(' = ');
 end;
 
 function TPowerSQLBuilder.UpFieldNull(const Field: WideString): TPowerSQLBuilder;
