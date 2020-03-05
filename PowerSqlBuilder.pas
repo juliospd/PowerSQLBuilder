@@ -284,8 +284,10 @@ type
     //
     function &Is : TPowerSQLBuilder; virtual;
     function &As( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &Or( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &And( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &Or( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &Or : TPowerSQLBuilder; overload; virtual;
+    function &And( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &And : TPowerSQLBuilder; overload; virtual;
     function &On( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &In : TPowerSQLBuilder;  overload; virtual;
     function &In( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
@@ -516,6 +518,16 @@ end;
 function TPowerSQLBuilder.IsNull: TPowerSQLBuilder;
 begin
   Result := Add(' is null ');
+end;
+
+function TPowerSQLBuilder.&And: TPowerSQLBuilder;
+begin
+  Result := Add(' and  ');
+end;
+
+function TPowerSQLBuilder.&Or: TPowerSQLBuilder;
+begin
+  Result := Add(' or ');
 end;
 
 function TPowerSQLBuilder.Add(const Value: WideString): TPowerSQLBuilder;
