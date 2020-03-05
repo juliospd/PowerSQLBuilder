@@ -209,6 +209,8 @@ type
     function Where( const Value : WideString; const Cast : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Order_By : TPowerSQLBuilder; overload; virtual;
     function Order_By( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Partition_By : TPowerSQLBuilder; overload; virtual;
+    function Partition_By( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Desc : TPowerSQLBuilder; virtual;
     function Group_By( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Values : TPowerSQLBuilder; virtual;
@@ -220,6 +222,8 @@ type
     function having( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function DropTable( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Union : TPowerSQLBuilder; virtual;
+    function Over : TPowerSQLBuilder; virtual;
+
     /// <summary>
     /// sP : Abre um Parentese Start Parent '('
     /// </summary>
@@ -262,6 +266,7 @@ type
     function AlterTable(const Value : WideString ) : TPowerSQLBuilder; virtual;
     function AutoIncrement(const Value : Integer ) : TPowerSQLBuilder; virtual;
     function EndIn : TPowerSQLBuilder; virtual;
+    function EndOver : TPowerSQLBuilder; virtual;
     function Returning( Field : WideString ) : TPowerSQLBuilder; virtual;
     function OutPut( Field : WideString ) : TPowerSQLBuilder; virtual;
     function OutPutField( Field : WideString ) : TPowerSQLBuilder; virtual;
@@ -283,7 +288,8 @@ type
     function Default( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     //
     function &Is : TPowerSQLBuilder; virtual;
-    function &As( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &As( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &As : TPowerSQLBuilder; overload; virtual;
     function &Or( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function &Or : TPowerSQLBuilder; overload; virtual;
     function &And( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
@@ -312,6 +318,8 @@ type
     function &Else( Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function &End( Name : WideString ) : TPowerSQLBuilder; overload; virtual;
     function &End : TPowerSQLBuilder; overload; virtual;
+    function &With( Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &With : TPowerSQLBuilder; overload; virtual;
 
     function GetJson( var Query : TZQuery; NameArray : WideString ) : WideString; overload;
 
@@ -530,6 +538,21 @@ begin
   Result := Add(' or ');
 end;
 
+function TPowerSQLBuilder.&With: TPowerSQLBuilder;
+begin
+  Result := Add(' with ');
+end;
+
+function TPowerSQLBuilder.&With(Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' with ').Add( Value );
+end;
+
+function TPowerSQLBuilder.&As: TPowerSQLBuilder;
+begin
+  Result := Add(' as ');
+end;
+
 function TPowerSQLBuilder.Add(const Value: WideString): TPowerSQLBuilder;
 begin
   Self.FValuePSB.Append( Value );
@@ -721,6 +744,11 @@ begin
 end;
 
 function TPowerSQLBuilder.EndIn: TPowerSQLBuilder;
+begin
+  Result := eP;
+end;
+
+function TPowerSQLBuilder.EndOver: TPowerSQLBuilder;
 begin
   Result := eP;
 end;
@@ -1374,6 +1402,21 @@ end;
 function TPowerSQLBuilder.OutPutField(Field: WideString): TPowerSQLBuilder;
 begin
   Result := Add(', inserted.').Add(Trim(Field)).Add(' ');
+end;
+
+function TPowerSQLBuilder.Over: TPowerSQLBuilder;
+begin
+  Result := Add(' over (')
+end;
+
+function TPowerSQLBuilder.Partition_By(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' partition by ').Add( Value );
+end;
+
+function TPowerSQLBuilder.Partition_By: TPowerSQLBuilder;
+begin
+  Result := Add(' partition by ')
 end;
 
 function TPowerSQLBuilder.PostGreSQL: TPowerSQLBuilder;
