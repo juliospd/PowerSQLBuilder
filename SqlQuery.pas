@@ -253,7 +253,7 @@ begin
   if Length(Trim(Format)) = 0  then
     Format := '#0.00';
 
-  Result := FormatCurr( Format, getCurrency( NameField ) );
+  Result := FormatFloat( Format, getCurrency( NameField ) );
 end;
 
 function TSQLQuery.DateToString(NameField, Format: WideString): WideString;
