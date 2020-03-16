@@ -105,11 +105,12 @@ begin
   // Self.FSQL.Insert('clientes').Fields( Self.FModel.ToString )
   // mais esta conversão estaria no sei model através de processos RTTI.
 
-  Self.FSQL.Insert('clientes').Fields('nome, limite, ativo, data').Values;
-  Self.FSQL.Field( Self.FModel.nome ).Next;
-  Self.FSQL.Field( Self.FModel.limite ).Next;
-  Self.FSQL.Field( Self.FModel.ativo ).Next;
-  Self.FSQL.Field( Self.FModel.data ).EndValues.Execute( zCmd );
+  Self.FSQL.Insert('clientes').Fields('nome, limite, ativo, data').Values
+    .Field( Self.FModel.nome ).Next
+    .Field( Self.FModel.limite ).Next
+    .Field( Self.FModel.ativo ).Next
+    .Field( Self.FModel.data ).EndValues
+      .Execute( zCmd );
 end;
 
 procedure TfrmMain.SQLSelect;
@@ -117,10 +118,31 @@ begin
   if not Assigned( Self.FModel ) then
     Exit;
 
+  { -- Exemple
+  Self.FSQL.Select('basic.*, par.*').From
+    .sP
+      .Select('A.IDCLIFOR, A.DIGITOTITULO, A.DTMOVIHENTO, A.DTVENCIHENTO, A.IDTITULO, A.VALTITULO, A.OBSTITULO, B.DTPAGAHENTO, B.VALPAGAMENTOTITULO, A.FLAGBAIXADA ')
+      .From('contas_pagar a')
+        .LeftJoin('CONTAS_PAGAR_BAIXAS b').&On('b.IDCLIFOR = a.IDCLIFOR and b.IDTITULO = a.IDTITULO and b.DIGITOTITULO = a.DIGITOTITULO')
+          .Order_By('a.IDCLIFOR, a.IDTITULO, a.DTMOVIHENTO, a.DIGITOTITULO')
+    .eP.&As('basic').LeftJoin
+    .sP
+      .Select('A.IDCLIFOR, Max(A.DIGITOTITULO) as ParFim, A.DTMOVIHENTO, A.IDTITULO')
+        .From('contas_pagar a').Group_By('A.IDCLIFOR, A.DTMOVIMENTO, A.IDTITULO')
+    .eP.&As('par').&On('par.IDCLIFOR = basic.IDCLIFOR and par.DTMOVIMENTO = basic.DTMOVIMENTO and par.IDTITULO = basic.IDTITULO')
+    .Order_By('basic.IDCLIFOR, basic.IDTITULO, basic.DTMOVIMENTO, basic.DIGITOTITULO')
+      .Open( zCmd );
+  }
+
   // Select 1
-  Self.FSQL.Select('nome, limite, ativo').From('clientes').Order_By('id').Open( zCmd );
+  Self.FSQL.Select('nome, limite, ativo')
+    .From('clientes').Order_By('id')
+      .Open( zCmd );
   // Select 2
-  Self.FSQL.SelectFrom('clientes').Where('ativo').Equal( Self.FModel.ativo ).&And('limite').MajorEqual( Self.FModel.limite ).Order_By('id').Open( zCmd );
+  Self.FSQL.SelectFrom('clientes')
+    .Where('ativo').Equal( Self.FModel.ativo )
+      .&And('limite').MajorEqual( Self.FModel.limite )
+        .Order_By('id').Open( zCmd );
 end;
 
 procedure TfrmMain.SQLUpdate;
@@ -129,8 +151,11 @@ begin
     Exit;
 
   // a função UpField pedo o nome do campo e seu valor
-  Self.FSQL.Update('clientes').UpField('limite', Self.FModel.limite ).Next;
-  Self.FSQL.UpField('data', Self.FModel.data ).Where('ativo').Equal( Self.FModel.ativo ).Execute( zCmd );
+  Self.FSQL.Update('clientes')
+    .UpField('limite', Self.FModel.limite ).Next
+    .UpField('data', Self.FModel.data )
+      .Where('ativo').Equal( Self.FModel.ativo )
+        .Execute( zCmd );
 end;
 
 { TModelClientes }
