@@ -134,6 +134,7 @@ type
     function Eof : Boolean;
     function Bof : Boolean;
     function Active : Boolean;
+
     function SetField( Field : WideString; Value : WideString ) : TSQLQuery; overload; virtual;
     function SetField( Field : WideString; Value : Double ) : TSQLQuery; overload; virtual;
     function SetField( Field : WideString; Value : TDateTime ) : TSQLQuery; overload; virtual;
@@ -149,6 +150,7 @@ type
     function Append : TSQLQuery; virtual;
     function Edit : TSQLQuery; virtual;
     function Post : TSQLQuery; virtual;
+    function Close : TSQLQuery; virtual;
     //
     function getInteger( NameField : WideString ) : Integer; virtual;
     function getLongInt( NameField : WideString ) : Int64; virtual;
@@ -227,6 +229,14 @@ begin
     Result := Self.FDataSet.RecordCount;
 end;
 
+function TSQLQuery.Close: TSQLQuery;
+begin
+  if Self.FDataSet.Active then
+    Self.FDataSet.Close;
+
+  Result := Self;
+end;
+
 constructor TSQLQuery.Create;
 begin
   inherited Create;
@@ -243,7 +253,7 @@ begin
   if Length(Trim(Format)) = 0  then
     Format := '#0.00';
 
-  Result := FormatCurr( Format, getCurrency( NameField ) );
+  Result := FormatFloat( Format, getCurrency( NameField ) );
 end;
 
 function TSQLQuery.DateToString(NameField, Format: WideString): WideString;

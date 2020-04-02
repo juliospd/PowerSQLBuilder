@@ -101,7 +101,7 @@ type
     function Test( const Value : Boolean; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
     function TestDate(Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
     function TestOfDate(Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function TestOfTime( const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = ''; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function TestOfTime(const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = ''; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
   protected
     procedure SetZeus( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; OpenZeus : TOpenZ );
     procedure SetFireDac( ExecuteFireC : TExecuteFc; ExecuteFire : TExecuteF; OpenFire : TOpenF );
@@ -172,21 +172,22 @@ type
     // Field usado na inserção
     function Field( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function Field(Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Field( Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function FieldFloat( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; virtual;
-    function FieldOfDate(Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function FieldOfDate( Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function FieldOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     // Campo e valor usado no Update
+    function UpField( Field : WideString ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : WideString; const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
-    function UpFieldNull(Field: WideString): TPowerSQLBuilder;
+    function UpFieldNull(const Field: WideString): TPowerSQLBuilder;
     function UpFieldOfDate( Field : WideString; const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     function UpFieldOfTime( Field : WideString; const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
     // Power SQL
@@ -208,6 +209,8 @@ type
     function Where( const Value : WideString; const Cast : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Order_By : TPowerSQLBuilder; overload; virtual;
     function Order_By( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Partition_By : TPowerSQLBuilder; overload; virtual;
+    function Partition_By( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     function Desc : TPowerSQLBuilder; virtual;
     function Group_By( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Values : TPowerSQLBuilder; virtual;
@@ -218,6 +221,9 @@ type
     function SumAs( const Value : WideString; asValue : WideString ) : TPowerSQLBuilder; virtual;
     function having( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function DropTable( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function Union : TPowerSQLBuilder; virtual;
+    function Over : TPowerSQLBuilder; virtual;
+
     /// <summary>
     /// sP : Abre um Parentese Start Parent '('
     /// </summary>
@@ -239,6 +245,7 @@ type
     function Limit( const pag1, pag2 : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Like( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Next : TPowerSQLBuilder; virtual;
+    function NextField(const Value : WideString ) : TPowerSQLBuilder; virtual;
     function Fields( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function FieldsStart( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function FieldsInline( const Value : WideString ) : TPowerSQLBuilder; virtual;
@@ -259,27 +266,44 @@ type
     function AlterTable(const Value : WideString ) : TPowerSQLBuilder; virtual;
     function AutoIncrement(const Value : Integer ) : TPowerSQLBuilder; virtual;
     function EndIn : TPowerSQLBuilder; virtual;
+    function EndOver : TPowerSQLBuilder; virtual;
     function Returning( Field : WideString ) : TPowerSQLBuilder; virtual;
     function OutPut( Field : WideString ) : TPowerSQLBuilder; virtual;
     function OutPutField( Field : WideString ) : TPowerSQLBuilder; virtual;
+    function constraint(const Field : WideString ) : TPowerSQLBuilder; virtual;
+    function unique(const Field : WideString ) : TPowerSQLBuilder; virtual;
+    function AddConstraint( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function AddColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function DropColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function AlterColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function ModifyColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function PrimaryKey( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function IsNull : TPowerSQLBuilder; virtual;
+    function IsNotNull : TPowerSQLBuilder; virtual;
+    function NotIn : TPowerSQLBuilder; overload; virtual;
+    function NotIn(const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function NotNull : TPowerSQLBuilder; virtual;
+    function Default( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
+    function Default( const Value : Double ) : TPowerSQLBuilder; overload; virtual;
+    function Default( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
     //
-    function Empty : TPowerSQLBuilder; virtual;
     function &Is : TPowerSQLBuilder; virtual;
-    function &IsNull : TPowerSQLBuilder; virtual;
-    function &IsNotNull : TPowerSQLBuilder; virtual;
-    function &As( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &Not( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &Or( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function &And( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &As( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &As : TPowerSQLBuilder; overload; virtual;
+    function &Or( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &Or : TPowerSQLBuilder; overload; virtual;
+    function &And( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &And : TPowerSQLBuilder; overload; virtual;
     function &On( const Value : WideString ) : TPowerSQLBuilder; virtual;
     function &In : TPowerSQLBuilder;  overload; virtual;
     function &In( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function &Not_In : TPowerSQLBuilder; overload; virtual;
-    function &Not_In(const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &Not( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &Null : TPowerSQLBuilder; virtual;
     function &Case( Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
     function &Case : TPowerSQLBuilder; overload; virtual;
     function &When( Condition : WideString )  : TPowerSQLBuilder; overload; virtual;
     function &When  : TPowerSQLBuilder; overload; virtual;
+    function &Then  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : WideString )  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : Double; DecimalValue : ShortInt = 2 )  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : TDateTime; Mask : WideString = ''  )  : TPowerSQLBuilder; overload; virtual;
@@ -294,10 +318,8 @@ type
     function &Else( Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function &End( Name : WideString ) : TPowerSQLBuilder; overload; virtual;
     function &End : TPowerSQLBuilder; overload; virtual;
-    function &AddColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function &DropColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function &AlterColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function &ModifyColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &With( Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &With : TPowerSQLBuilder; overload; virtual;
 
     function GetJson( var Query : TZQuery; NameArray : WideString ) : WideString; overload;
 
@@ -371,9 +393,19 @@ begin
   Result := Add('insert into');
 end;
 
-function TPowerSQLBuilder.&NOT_IN(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.NotIn(const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' not in (').Add( Value ).eP;
+end;
+
+function TPowerSQLBuilder.NotNull: TPowerSQLBuilder;
+begin
+  Result := Add(' not null ');
+end;
+
+function TPowerSQLBuilder.&Null: TPowerSQLBuilder;
+begin
+  Result := Add(' null ');
 end;
 
 function TPowerSQLBuilder.&IN: TPowerSQLBuilder;
@@ -416,11 +448,6 @@ begin
   Result := Add(' else ').Field( Value );
 end;
 
-function TPowerSQLBuilder.Empty: TPowerSQLBuilder;
-begin
-  Result := Add(' null ');
-end;
-
 function TPowerSQLBuilder.&Else(Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' else ').Add( Value );
@@ -444,6 +471,11 @@ end;
 function TPowerSQLBuilder.&End(Name: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' end').&As( Name );
+end;
+
+function TPowerSQLBuilder.&Then: TPowerSQLBuilder;
+begin
+  Result := Add(' then ');
 end;
 
 function TPowerSQLBuilder.&Then(Value: Int64): TPowerSQLBuilder;
@@ -491,9 +523,34 @@ begin
   Result := Add(' is not null ');
 end;
 
-function TPowerSQLBuilder.&IsNull: TPowerSQLBuilder;
+function TPowerSQLBuilder.IsNull: TPowerSQLBuilder;
 begin
   Result := Add(' is null ');
+end;
+
+function TPowerSQLBuilder.&And: TPowerSQLBuilder;
+begin
+  Result := Add(' and  ');
+end;
+
+function TPowerSQLBuilder.&Or: TPowerSQLBuilder;
+begin
+  Result := Add(' or ');
+end;
+
+function TPowerSQLBuilder.&With: TPowerSQLBuilder;
+begin
+  Result := Add(' with ');
+end;
+
+function TPowerSQLBuilder.&With(Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' with ').Add( Value );
+end;
+
+function TPowerSQLBuilder.&As: TPowerSQLBuilder;
+begin
+  Result := Add(' as ');
 end;
 
 function TPowerSQLBuilder.Add(const Value: WideString): TPowerSQLBuilder;
@@ -505,6 +562,11 @@ end;
 function TPowerSQLBuilder.AddColumn( const Value: WideString): TPowerSQLBuilder;
 begin
   Result := Add(' add ').Add( Value );
+end;
+
+function TPowerSQLBuilder.AddConstraint( const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add( ' ADD CONSTRAINT ' ).Add( Value );
 end;
 
 function TPowerSQLBuilder.AddLine(const Value: WideString): TPowerSQLBuilder;
@@ -567,6 +629,11 @@ begin
   Self.FValuePSB.Clear;
   Self.FWhere := False;
   Result := Self;
+end;
+
+function TPowerSQLBuilder.constraint(const Field: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' constraint ').Add( Field );
 end;
 
 function TPowerSQLBuilder.CountAs(const asValue: WideString): TPowerSQLBuilder;
@@ -677,6 +744,11 @@ begin
 end;
 
 function TPowerSQLBuilder.EndIn: TPowerSQLBuilder;
+begin
+  Result := eP;
+end;
+
+function TPowerSQLBuilder.EndOver: TPowerSQLBuilder;
 begin
   Result := eP;
 end;
@@ -1291,6 +1363,11 @@ begin
   Result := Add(', ');
 end;
 
+function TPowerSQLBuilder.NextField(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(', ').add( Value );
+end;
+
 function TPowerSQLBuilder.&OR( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add(' or ').Add( Value );
@@ -1301,12 +1378,12 @@ begin
   Result := Add(' order by');
 end;
 
-function TPowerSQLBuilder.&NOT( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.&Not( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add(' not ').Add( Value );
 end;
 
-function TPowerSQLBuilder.NOT_IN: TPowerSQLBuilder;
+function TPowerSQLBuilder.NotIn: TPowerSQLBuilder;
 begin
   Result := Add(' not in (')
 end;
@@ -1327,10 +1404,30 @@ begin
   Result := Add(', inserted.').Add(Trim(Field)).Add(' ');
 end;
 
+function TPowerSQLBuilder.Over: TPowerSQLBuilder;
+begin
+  Result := Add(' over (')
+end;
+
+function TPowerSQLBuilder.Partition_By(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' partition by ').Add( Value );
+end;
+
+function TPowerSQLBuilder.Partition_By: TPowerSQLBuilder;
+begin
+  Result := Add(' partition by ')
+end;
+
 function TPowerSQLBuilder.PostGreSQL: TPowerSQLBuilder;
 begin
   Self.FSGDBType := dbPostGreSQL;
   Result := Self;
+end;
+
+function TPowerSQLBuilder.PrimaryKey(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' PRIMARY KEY ').Add( Value );
 end;
 
 function TPowerSQLBuilder.Returning(Field: WideString): TPowerSQLBuilder;
@@ -1627,6 +1724,16 @@ begin
   Result := Add(' ').Add( Field ).Equal( Value );
 end;
 
+function TPowerSQLBuilder.Union: TPowerSQLBuilder;
+begin
+  Result := Add(' union ');
+end;
+
+function TPowerSQLBuilder.unique(const Field: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' UNIQUE ( ').AddQuoted( Field ).Add(') ');
+end;
+
 function TPowerSQLBuilder.Update: TPowerSQLBuilder;
 begin
   Result := Add('update');
@@ -1652,11 +1759,15 @@ begin
   Result := Add(' ').Add( Field ).Equal( Value, Mask );
 end;
 
-function TPowerSQLBuilder.UpFieldNull(Field: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: WideString): TPowerSQLBuilder;
 begin
-  Result := Add(' ').Add( Field +' = null ' );
+  Result := Add(' ').Add( Field ).Add(' = ');
 end;
 
+function TPowerSQLBuilder.UpFieldNull(const Field: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' ').Add( Field ).Equal( ' null ' );
+end;
 
 function TPowerSQLBuilder.UpFieldOfDate(Field: WideString; const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
 begin
@@ -1693,6 +1804,21 @@ function TPowerSQLBuilder.Where( const Value : WideString ) : TPowerSQLBuilder;
 begin
   Result := Add(' where ').Add( Value );
   Self.FWhere := True;
+end;
+
+function TPowerSQLBuilder.Default(const Value: Integer): TPowerSQLBuilder;
+begin
+  Result := Add(' default ').Field( Value );
+end;
+
+function TPowerSQLBuilder.Default(const Value: Double): TPowerSQLBuilder;
+begin
+  Result := Add(' default ').Field( Value );
+end;
+
+function TPowerSQLBuilder.Default(const Value: WideString): TPowerSQLBuilder;
+begin
+  Result := Add(' default ').Field( Value );
 end;
 
 function TPowerSQLBuilder.Delete: TPowerSQLBuilder;
