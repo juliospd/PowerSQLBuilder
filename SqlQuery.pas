@@ -261,7 +261,10 @@ begin
   if Length(Trim(Format)) = 0  then
     Format := 'yyyy.mm.dd hh:nn:ss';
 
-  Result := FormatDateTime( Format, getDateTime(NameField) );
+  if Self.FDataSet.FieldByName(NameField).IsNull then
+    Result := 'Null'
+  else
+    Result := FormatDateTime( Format, Self.FDataSet.FieldByName(NameField).AsDateTime );
 end;
 
 destructor TSQLQuery.Destroy;
