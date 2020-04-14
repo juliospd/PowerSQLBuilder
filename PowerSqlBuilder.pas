@@ -1766,7 +1766,7 @@ end;
 
 function TPowerSQLBuilder.UpFieldNull(const Field: WideString): TPowerSQLBuilder;
 begin
-  Result := Add(' ').Add( Field ).Equal( ' null ' );
+  Result := Add(' ').Add( Field ).Add( ' = null ' );
 end;
 
 function TPowerSQLBuilder.UpFieldOfDate(Field: WideString; const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;

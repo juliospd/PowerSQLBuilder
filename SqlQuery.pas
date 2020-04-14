@@ -1016,7 +1016,10 @@ begin
         on e: Exception do
         begin
           if Self.FLogSQL then
+          begin
+            WriteLog( 'SQL : [' + GetString + ']' );
             WriteLog( e.Message );
+          end;
 
           case SGDBType of
             dbPostGreSQL:
