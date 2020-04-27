@@ -94,14 +94,14 @@ type
     FExecuteUniDacC: TExecuteUc;
     FExecuteADOC: TExecuteAc;
 
-    function Test( const Value : WideString; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function Test( const Value : Double; DecimalValue : ShortInt = 2; Condition : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
-    function Test( const Value : Int64; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function Test( const Value : Integer; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function Test( const Value : Boolean; Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function TestDate(Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
-    function TestOfDate(Value : TDateTime; Condition : WideString; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function TestOfTime(const Value : TDateTime; Seconds : Boolean = True; Condition : WideString = ''; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function Test( const Value : String; Condition : String ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : Double; DecimalValue : ShortInt = 2; Condition : String = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : Int64; Condition : String ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : Integer; Condition : String ) : TPowerSQLBuilder; overload; virtual;
+    function Test( const Value : Boolean; Condition : String ) : TPowerSQLBuilder; overload; virtual;
+    function TestDate(Value : TDateTime; Condition : String; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
+    function TestOfDate(Value : TDateTime; Condition : String; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function TestOfTime(const Value : TDateTime; Seconds : Boolean = True; Condition : String = ''; Mask : String = '' ) : TPowerSQLBuilder; virtual;
   protected
     procedure SetZeus( ExecuteZeusC : TExecuteZc; ExecuteZeus : TExecuteZ; OpenZeus : TOpenZ );
     procedure SetFireDac( ExecuteFireC : TExecuteFc; ExecuteFire : TExecuteF; OpenFire : TOpenF );
@@ -110,117 +110,117 @@ type
   public
     property SGDBType : TSGDBType read FSGDBType;
     // Funções simples
-    function Add(const Value : WideString) : TPowerSQLBuilder; virtual;
-    function AddQuoted(const Value : WideString) : TPowerSQLBuilder; virtual;
-    function AddLine(const Value : WideString) : TPowerSQLBuilder; virtual;
+    function Add(const Value : String) : TPowerSQLBuilder; virtual;
+    function AddQuoted(const Value : String) : TPowerSQLBuilder; virtual;
+    function AddLine(const Value : String) : TPowerSQLBuilder; virtual;
     function Clear : TPowerSQLBuilder; virtual;
-    function GetString : WideString; virtual;
+    function GetString : String; virtual;
     // Teste de Igual a
-    function Equal( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Equal( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function Equal( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Equal( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
-    function EqualOfDate( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function EqualOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function EqualOfDate( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function EqualOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Teste de Maior que
-    function Major( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Major( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Major( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function Major( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Major( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function Major( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Major( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Major( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
-    function MajorOfDate( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function MajorOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function MajorOfDate( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function MajorOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Teste de Maior igual
-    function MajorEqual( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function MajorEqual( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function MajorEqual( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function MajorEqual( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function MajorEqual( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function MajorEqual( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function MajorEqual( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function MajorEqual( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
-    function MajorEqualOfDate( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function MajorEqualOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function MajorEqualOfDate( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function MajorEqualOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Teste de Menor que
-    function Minor( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Minor( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Minor( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function Minor( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Minor( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function Minor( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Minor( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Minor( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
-    function MinorOfDate( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function MinorOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function MinorOfDate( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function MinorOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Teste de Menor Igual
-    function MinorEqual( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function MinorEqual( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function MinorEqual( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function MinorEqual( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function MinorEqual( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function MinorEqual( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function MinorEqual( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function MinorEqual( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
-    function MinorEqualOfDate( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function MinorEqualOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function MinorEqualOfDate( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function MinorEqualOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Teste de Diferença que
-    function Different( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Different( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Different( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function Different( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Different( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function Different( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Different( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Different( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
-    function DifferentOfDate( const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function DifferentOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function DifferentOfDate( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function DifferentOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Field usado na inserção
-    function Field( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Field( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function Field( Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Field( Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
     function FieldFloat( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; virtual;
-    function FieldOfDate( Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function FieldOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function FieldOfDate( Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function FieldOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Campo e valor usado no Update
-    function UpField( Field : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function UpField( Field : WideString; const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function UpField( Field : WideString; const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function UpField( Field : WideString; const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
-    function UpField( Field : WideString; const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
-    function UpField( Field : WideString; const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
-    function UpField( Field : WideString; const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
-    function UpFieldNull(const Field: WideString): TPowerSQLBuilder;
-    function UpFieldOfDate( Field : WideString; const Value : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function UpFieldOfTime( Field : WideString; const Value : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
+    function UpField( Field : String ) : TPowerSQLBuilder; overload; virtual;
+    function UpField( Field : String; const Value : String ) : TPowerSQLBuilder; overload; virtual;
+    function UpField( Field : String; const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
+    function UpField( Field : String; const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
+    function UpField( Field : String; const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
+    function UpField( Field : String; const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
+    function UpField( Field : String; const Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
+    function UpFieldNull(const Field: String): TPowerSQLBuilder;
+    function UpFieldOfDate( Field : String; const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function UpFieldOfTime( Field : String; const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Power SQL
-    function Insert( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Insert( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Insert : TPowerSQLBuilder; overload; virtual;
     function Select : TPowerSQLBuilder; overload; virtual;
-    function Select( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Select( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function SelectFrom : TPowerSQLBuilder; overload; virtual;
-    function SelectFrom( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function Update( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function SelectFrom( const Value : String ) : TPowerSQLBuilder; overload; virtual;
+    function Update( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Update : TPowerSQLBuilder; overload; virtual;
-    function Delete( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Delete( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Delete : TPowerSQLBuilder; overload; virtual;
-    function DeleteFrom( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function DeleteFrom( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function DeleteFrom : TPowerSQLBuilder; overload; virtual;
-    function From( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function From( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function From : TPowerSQLBuilder; overload; virtual;
-    function Where( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function Where( const Value : WideString; const Cast : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Where( const Value : String ) : TPowerSQLBuilder; overload; virtual;
+    function Where( const Value : String; const Cast : String ) : TPowerSQLBuilder; overload; virtual;
     function Order_By : TPowerSQLBuilder; overload; virtual;
-    function Order_By( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Order_By( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Partition_By : TPowerSQLBuilder; overload; virtual;
-    function Partition_By( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Partition_By( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Desc : TPowerSQLBuilder; virtual;
-    function Group_By( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function Group_By( const Value : String ) : TPowerSQLBuilder; virtual;
     function Values : TPowerSQLBuilder; virtual;
     function EndValues : TPowerSQLBuilder; virtual;
     function EndValuesID : TPowerSQLBuilder; virtual;
     function Sum : TPowerSQLBuilder;  overload; virtual;
-    function Sum( const Value : WideString ) : TPowerSQLBuilder;  overload; virtual;
-    function SumAs( const Value : WideString; asValue : WideString ) : TPowerSQLBuilder; virtual;
-    function having( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function DropTable( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function Sum( const Value : String ) : TPowerSQLBuilder;  overload; virtual;
+    function SumAs( const Value : String; asValue : String ) : TPowerSQLBuilder; virtual;
+    function having( const Value : String ) : TPowerSQLBuilder; virtual;
+    function DropTable( const Value : String ) : TPowerSQLBuilder; virtual;
     function Union : TPowerSQLBuilder; virtual;
     function Over : TPowerSQLBuilder; virtual;
 
@@ -232,96 +232,96 @@ type
     /// eP : Fecha um Parentese end parent ')'
     /// </summary>
     function eP : TPowerSQLBuilder; virtual;
-    function LeftJoin( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function LeftJoin( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function LeftJoin : TPowerSQLBuilder; overload; virtual;
-    function RightJoin( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function RightJoin( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function RightJoin : TPowerSQLBuilder; overload; virtual;
-    function InnerJoin( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function InnerJoin( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function InnerJoin : TPowerSQLBuilder; overload; virtual;
-    function FullJoin( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function FullJoin( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function FullJoin : TPowerSQLBuilder; overload; virtual;
     function Top( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Limit( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Limit( const pag1, pag2 : Integer ) : TPowerSQLBuilder; overload; virtual;
-    function Like( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function Like( const Value : String ) : TPowerSQLBuilder; virtual;
     function Next : TPowerSQLBuilder; virtual;
-    function NextField(const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function Fields( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function FieldsStart( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function FieldsInline( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function FieldsEnd( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function BetWeen( const ValueStart, ValueEnd : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; overload; virtual;
+    function NextField(const Value : String ) : TPowerSQLBuilder; virtual;
+    function Fields( const Value : String ) : TPowerSQLBuilder; virtual;
+    function FieldsStart( const Value : String ) : TPowerSQLBuilder; virtual;
+    function FieldsInline( const Value : String ) : TPowerSQLBuilder; virtual;
+    function FieldsEnd( const Value : String ) : TPowerSQLBuilder; virtual;
+    function BetWeen( const ValueStart, ValueEnd : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Integer ) : TPowerSQLBuilder; overload; virtual;
     function BetWeen( const ValueStart, ValueEnd : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
-    function BetWeenOfDate( const ValueStart, ValueEnd : TDateTime; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function BetWeenOfTime( const ValueStart, ValueEnd : TDateTime; Seconds : Boolean = True; Mask : WideString = '' ) : TPowerSQLBuilder; virtual;
-    function Cast( Field : WideString; const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function BetWeenOfDate( const ValueStart, ValueEnd : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function BetWeenOfTime( const ValueStart, ValueEnd : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
+    function Cast( Field : String; const Value : String ) : TPowerSQLBuilder; virtual;
     function Distinct : TPowerSQLBuilder; overload; virtual;
-    function Distinct( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Distinct( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Count : TPowerSQLBuilder; virtual;
-    function CountAs( const asValue : WideString ) : TPowerSQLBuilder; virtual;
-    function Max(const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function Min(const Value : WideString ) : TPowerSQLBuilder; Virtual;
-    function AlterTable(const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function CountAs( const asValue : String ) : TPowerSQLBuilder; virtual;
+    function Max(const Value : String ) : TPowerSQLBuilder; virtual;
+    function Min(const Value : String ) : TPowerSQLBuilder; Virtual;
+    function AlterTable(const Value : String ) : TPowerSQLBuilder; virtual;
     function AutoIncrement(const Value : Integer ) : TPowerSQLBuilder; virtual;
     function EndIn : TPowerSQLBuilder; virtual;
     function EndOver : TPowerSQLBuilder; virtual;
-    function Returning( Field : WideString ) : TPowerSQLBuilder; virtual;
-    function OutPut( Field : WideString ) : TPowerSQLBuilder; virtual;
-    function OutPutField( Field : WideString ) : TPowerSQLBuilder; virtual;
-    function constraint(const Field : WideString ) : TPowerSQLBuilder; virtual;
-    function unique(const Field : WideString ) : TPowerSQLBuilder; virtual;
-    function AddConstraint( const Value : WideString ) : TPowerSQLBuilder; virtual;
-    function AddColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function DropColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function AlterColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function ModifyColumn( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function PrimaryKey( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function Returning( Field : String ) : TPowerSQLBuilder; virtual;
+    function OutPut( Field : String ) : TPowerSQLBuilder; virtual;
+    function OutPutField( Field : String ) : TPowerSQLBuilder; virtual;
+    function constraint(const Field : String ) : TPowerSQLBuilder; virtual;
+    function unique(const Field : String ) : TPowerSQLBuilder; virtual;
+    function AddConstraint( const Value : String ) : TPowerSQLBuilder; virtual;
+    function AddColumn( const Value : String ) : TPowerSQLBuilder; overload; virtual;
+    function DropColumn( const Value : String ) : TPowerSQLBuilder; overload; virtual;
+    function AlterColumn( const Value : String ) : TPowerSQLBuilder; overload; virtual;
+    function ModifyColumn( const Value : String ) : TPowerSQLBuilder; overload; virtual;
+    function PrimaryKey( const Value : String ) : TPowerSQLBuilder; virtual;
     function IsNull : TPowerSQLBuilder; virtual;
     function IsNotNull : TPowerSQLBuilder; virtual;
     function NotIn : TPowerSQLBuilder; overload; virtual;
-    function NotIn(const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function NotIn(const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function NotNull : TPowerSQLBuilder; virtual;
     function Default( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function Default( const Value : Double ) : TPowerSQLBuilder; overload; virtual;
-    function Default( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function Default( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     //
     function &Is : TPowerSQLBuilder; virtual;
-    function &As( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &As( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function &As : TPowerSQLBuilder; overload; virtual;
-    function &Or( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &Or( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function &Or : TPowerSQLBuilder; overload; virtual;
-    function &And( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &And( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function &And : TPowerSQLBuilder; overload; virtual;
-    function &On( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &On( const Value : String ) : TPowerSQLBuilder; virtual;
     function &In : TPowerSQLBuilder;  overload; virtual;
-    function &In( const Value : WideString ) : TPowerSQLBuilder; overload; virtual;
-    function &Not( const Value : WideString ) : TPowerSQLBuilder; virtual;
+    function &In( const Value : String ) : TPowerSQLBuilder; overload; virtual;
+    function &Not( const Value : String ) : TPowerSQLBuilder; virtual;
     function &Null : TPowerSQLBuilder; virtual;
-    function &Case( Condition : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &Case( Condition : String ) : TPowerSQLBuilder; overload; virtual;
     function &Case : TPowerSQLBuilder; overload; virtual;
-    function &When( Condition : WideString )  : TPowerSQLBuilder; overload; virtual;
+    function &When( Condition : String )  : TPowerSQLBuilder; overload; virtual;
     function &When  : TPowerSQLBuilder; overload; virtual;
     function &Then  : TPowerSQLBuilder; overload; virtual;
-    function &Then( Value : WideString )  : TPowerSQLBuilder; overload; virtual;
+    function &Then( Value : String )  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : Double; DecimalValue : ShortInt = 2 )  : TPowerSQLBuilder; overload; virtual;
-    function &Then( Value : TDateTime; Mask : WideString = ''  )  : TPowerSQLBuilder; overload; virtual;
+    function &Then( Value : TDateTime; Mask : String = ''  )  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : Int64 )  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : Integer )  : TPowerSQLBuilder; overload; virtual;
     function &Then( Value : Boolean )  : TPowerSQLBuilder; overload; virtual;
-    function &Else( Value : WideString )  : TPowerSQLBuilder; overload; virtual;
+    function &Else( Value : String )  : TPowerSQLBuilder; overload; virtual;
     function &Else( Value : Double; DecimalValue : ShortInt = 2 )  : TPowerSQLBuilder; overload; virtual;
-    function &Else( Value : TDateTime; Mask : WideString = ''  )  : TPowerSQLBuilder; overload; virtual;
+    function &Else( Value : TDateTime; Mask : String = ''  )  : TPowerSQLBuilder; overload; virtual;
     function &Else( Value : Int64 )  : TPowerSQLBuilder; overload; virtual;
     function &Else( Value : Integer ) : TPowerSQLBuilder; overload; virtual;
     function &Else( Value : Boolean ) : TPowerSQLBuilder; overload; virtual;
-    function &End( Name : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &End( Name : String ) : TPowerSQLBuilder; overload; virtual;
     function &End : TPowerSQLBuilder; overload; virtual;
-    function &With( Value : WideString ) : TPowerSQLBuilder; overload; virtual;
+    function &With( Value : String ) : TPowerSQLBuilder; overload; virtual;
     function &With : TPowerSQLBuilder; overload; virtual;
 
-    function GetJson( var Query : TZQuery; NameArray : WideString ) : WideString; overload;
+    function GetJson( var Query : TZQuery; NameArray : String ) : String; overload;
 
     function Execute(var Connection : TZConnection ) : TPowerSQLBuilder; overload;
     function Execute(var Query : TZQuery ) : TPowerSQLBuilder; overload;
@@ -349,7 +349,7 @@ implementation
 
 { TPowerSQLBuilder }
 
-function TPowerSQLBuilder.&ON(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&ON(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' on (').Add( Value ).EndValues;
 end;
@@ -378,7 +378,7 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.&IN(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&IN(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' in (').Add( Value );
 end;
@@ -393,7 +393,7 @@ begin
   Result := Add('insert into');
 end;
 
-function TPowerSQLBuilder.NotIn(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.NotIn(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' not in (').Add( Value ).eP;
 end;
@@ -413,7 +413,7 @@ begin
   Result := Add(' in (');
 end;
 
-function TPowerSQLBuilder.&As(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&As(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' as ').Add( Value );
 end;
@@ -428,7 +428,7 @@ begin
   Result := Add(' case');
 end;
 
-function TPowerSQLBuilder.&Case(Condition: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&Case(Condition: String): TPowerSQLBuilder;
 begin
   Result := Add(' case ').Add( Condition );
 end;
@@ -448,7 +448,7 @@ begin
   Result := Add(' else ').Field( Value );
 end;
 
-function TPowerSQLBuilder.&Else(Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&Else(Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' else ').Add( Value );
 end;
@@ -458,7 +458,7 @@ begin
   Result := Add(' else ').Field( Value, DecimalValue );
 end;
 
-function TPowerSQLBuilder.&Else(Value: TDateTime; Mask: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&Else(Value: TDateTime; Mask: String): TPowerSQLBuilder;
 begin
   Result := Add(' else ').Field( Value, Mask );
 end;
@@ -468,7 +468,7 @@ begin
   Result := Add(' end');
 end;
 
-function TPowerSQLBuilder.&End(Name: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&End(Name: String): TPowerSQLBuilder;
 begin
   Result := Add(' end').&As( Name );
 end;
@@ -498,7 +498,7 @@ begin
   Result := Add(' TOP ').Field(Value);
 end;
 
-function TPowerSQLBuilder.&Then(Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&Then(Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' then ').Add( Value );
 end;
@@ -508,7 +508,7 @@ begin
   Result := Add(' then ').Field( Value, DecimalValue );
 end;
 
-function TPowerSQLBuilder.&Then(Value: TDateTime; Mask: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&Then(Value: TDateTime; Mask: String): TPowerSQLBuilder;
 begin
   Result := Add(' then ').Field( Value, Mask );
 end;
@@ -543,7 +543,7 @@ begin
   Result := Add(' with ');
 end;
 
-function TPowerSQLBuilder.&With(Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.&With(Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' with ').Add( Value );
 end;
@@ -553,38 +553,38 @@ begin
   Result := Add(' as ');
 end;
 
-function TPowerSQLBuilder.Add(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Add(const Value: String): TPowerSQLBuilder;
 begin
   Self.FValuePSB.Append( Value );
   Result := Self;
 end;
 
-function TPowerSQLBuilder.AddColumn( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.AddColumn( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' add ').Add( Value );
 end;
 
-function TPowerSQLBuilder.AddConstraint( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.AddConstraint( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add( ' ADD CONSTRAINT ' ).Add( Value );
 end;
 
-function TPowerSQLBuilder.AddLine(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.AddLine(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add( Value ).Add( #10 );
 end;
 
-function TPowerSQLBuilder.AddQuoted( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.AddQuoted( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add( QuotedStr( Value ) );
 end;
 
-function TPowerSQLBuilder.AlterColumn( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.AlterColumn( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' alter column ').Add( Value );
 end;
 
-function TPowerSQLBuilder.AlterTable(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.AlterTable(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' alter table ').Add( value );
 end;
@@ -604,22 +604,22 @@ begin
   Result := Add(' between ').Field( ValueStart ).Add(' and ').Field( ValueEnd );
 end;
 
-function TPowerSQLBuilder.BetWeen(const ValueStart, ValueEnd: TDateTime; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.BetWeen(const ValueStart, ValueEnd: TDateTime; Mask : String ): TPowerSQLBuilder;
 begin
   Result := Add(' between ').Field( ValueStart, Mask ).Add(' and ').Field( ValueEnd, Mask );
 end;
 
-function TPowerSQLBuilder.BetWeenOfDate(const ValueStart, ValueEnd: TDateTime; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.BetWeenOfDate(const ValueStart, ValueEnd: TDateTime; Mask : String ): TPowerSQLBuilder;
 begin
   Result := Add(' between ').FieldOfDate( ValueStart, Mask ).Add(' and ').FieldOfDate( ValueEnd, Mask );
 end;
 
-function TPowerSQLBuilder.BetWeenOfTime(const ValueStart, ValueEnd: TDateTime; Seconds : Boolean; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.BetWeenOfTime(const ValueStart, ValueEnd: TDateTime; Seconds : Boolean; Mask : String): TPowerSQLBuilder;
 begin
   Result := Add(' between ').FieldOfTime( ValueStart, Seconds, Mask ).Add(' and ').FieldOfTime( ValueEnd, Seconds, Mask );
 end;
 
-function TPowerSQLBuilder.Cast(Field: WideString; const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Cast(Field: String; const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' cast(').Add(Field).&As(Value).Add(')');
 end;
@@ -631,12 +631,12 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.constraint(const Field: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.constraint(const Field: String): TPowerSQLBuilder;
 begin
   Result := Add(' constraint ').Add( Field );
 end;
 
-function TPowerSQLBuilder.CountAs(const asValue: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.CountAs(const asValue: String): TPowerSQLBuilder;
 begin
   Result := Add(' count(*)').&As( asValue );
 end;
@@ -668,12 +668,12 @@ begin
   Result := Test( Value, DecimalValue, '<>');
 end;
 
-function TPowerSQLBuilder.Different(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Different(const Value: String): TPowerSQLBuilder;
 begin
   Result := Test( Value, '<>' );
 end;
 
-function TPowerSQLBuilder.Different(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Different(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestDate( Value, '<>', Mask );
 end;
@@ -693,27 +693,27 @@ begin
   Result := Test( Value, '<>' );
 end;
 
-function TPowerSQLBuilder.DifferentOfDate(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.DifferentOfDate(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfDate( Value, '<>', Mask );
 end;
 
-function TPowerSQLBuilder.DifferentOfTime(const Value: TDateTime;Seconds: Boolean; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.DifferentOfTime(const Value: TDateTime;Seconds: Boolean; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfTime( Value, Seconds,  '<>', Mask );
 end;
 
-function TPowerSQLBuilder.Distinct(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Distinct(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' Distinct ').Add( Value );
 end;
 
-function TPowerSQLBuilder.DropColumn( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.DropColumn( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' drop column ').Add( Value );
 end;
 
-function TPowerSQLBuilder.DropTable(const Value : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.DropTable(const Value : String ): TPowerSQLBuilder;
 begin
   Result := Add(' drop table ').Add( Value );
 end;
@@ -723,12 +723,12 @@ begin
   Result := Add(' Distinct');
 end;
 
-function TPowerSQLBuilder.Equal(const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.Equal(const Value: TDateTime; Mask : String ): TPowerSQLBuilder;
 begin
   Result := TestDate( Value, '=', Mask);
 end;
 
-function TPowerSQLBuilder.Equal(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Equal(const Value: String): TPowerSQLBuilder;
 begin
   Result := Test( Value, '=' );
 end;
@@ -778,12 +778,12 @@ begin
   Result := Test( Value, '=' );
 end;
 
-function TPowerSQLBuilder.EqualOfDate(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.EqualOfDate(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfDate( Value, '=', Mask );
 end;
 
-function TPowerSQLBuilder.EqualOfTime(const Value: TDateTime; Seconds : Boolean; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.EqualOfTime(const Value: TDateTime; Seconds : Boolean; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfTime( Value, Seconds, '=', Mask );
 end;
@@ -836,7 +836,7 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.Field(Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.Field(Value: TDateTime; Mask : String ): TPowerSQLBuilder;
 begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd hh:nn:ss';
@@ -913,7 +913,7 @@ begin
   Result := Add( IntToStr( Value ) );
 end;
 
-function TPowerSQLBuilder.FieldOfDate(Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.FieldOfDate(Value: TDateTime; Mask : String ): TPowerSQLBuilder;
 begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd';
@@ -962,7 +962,7 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.FieldOfTime(const Value: TDateTime; Seconds: Boolean; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.FieldOfTime(const Value: TDateTime; Seconds: Boolean; Mask : String): TPowerSQLBuilder;
 begin
   if Mask = '' then
   begin
@@ -1018,22 +1018,22 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.Fields(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Fields(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' (').Add( Value ).EndValues;
 end;
 
-function TPowerSQLBuilder.FieldsEnd( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.FieldsEnd( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add( Value ).EndValues;
 end;
 
-function TPowerSQLBuilder.FieldsInline( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.FieldsInline( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add( Value );
 end;
 
-function TPowerSQLBuilder.FieldsStart( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.FieldsStart( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' (').Add( Value );
 end;
@@ -1054,7 +1054,7 @@ begin
   Result := Add(' full join');
 end;
 
-function TPowerSQLBuilder.Field(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Field(const Value: String): TPowerSQLBuilder;
 begin
   Result := AddQuoted(Value);
 end;
@@ -1064,9 +1064,9 @@ begin
   Result := Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
 end;
 
-function TPowerSQLBuilder.GetJson(var Query: TZQuery; NameArray: WideString): WideString;
+function TPowerSQLBuilder.GetJson(var Query: TZQuery; NameArray: String): String;
 var
-  SqlFreeze : WideString;
+  SqlFreeze : String;
 begin
   Result := '';
 
@@ -1088,15 +1088,15 @@ begin
 
   Open( Query );
 
-  Result := Query.FieldByName('json').AsWideString;
+  Result := Query.FieldByName('json').AsString;
 end;
 
-function TPowerSQLBuilder.GetString: WideString;
+function TPowerSQLBuilder.GetString: String;
 begin
   Result := Self.FValuePSB.ToString;
 end;
 
-function TPowerSQLBuilder.&AND( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.&AND( const Value : String ) : TPowerSQLBuilder;
 begin
   if not Self.FWhere then
   begin
@@ -1106,47 +1106,47 @@ begin
   else Result := Add(' and ').Add( Value );
 end;
 
-function TPowerSQLBuilder.Delete( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.Delete( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add('delete ').Add( Value );
 end;
 
-function TPowerSQLBuilder.DeleteFrom( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.DeleteFrom( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add('delete from ').Add( Value );
 end;
 
-function TPowerSQLBuilder.From( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.From( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add(' from ').Add( Value );
 end;
 
-function TPowerSQLBuilder.FullJoin( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.FullJoin( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' full join ').Add( Value );
 end;
 
-function TPowerSQLBuilder.Group_By( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.Group_By( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add(' group by ').Add( Value );
 end;
 
-function TPowerSQLBuilder.having(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.having(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' having (').Add( Value ).eP;
 end;
 
-function TPowerSQLBuilder.InnerJoin( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.InnerJoin( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' Inner Join ').Add( Value );
 end;
 
-function TPowerSQLBuilder.Insert( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.Insert( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add('insert into ').Add( Value );
 end;
 
-function TPowerSQLBuilder.LeftJoin( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.LeftJoin( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' Left Join ').Add( Value );
 end;
@@ -1156,7 +1156,7 @@ begin
   Result := Add(' Left Join');
 end;
 
-function TPowerSQLBuilder.Like(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Like(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' like ').AddQuoted( Trim(Value) + '%' );
 end;
@@ -1191,17 +1191,17 @@ begin
   Result := Test( Value, DecimalValue, '>');
 end;
 
-function TPowerSQLBuilder.Major(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Major(const Value: String): TPowerSQLBuilder;
 begin
   Result := Test( Value, '>');
 end;
 
-function TPowerSQLBuilder.Major(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Major(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestDate( Value, '>', Mask);
 end;
 
-function TPowerSQLBuilder.MajorEqual(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MajorEqual(const Value: String): TPowerSQLBuilder;
 begin
   Result := Test( Value, '>=');
 end;
@@ -1221,7 +1221,7 @@ begin
   Result := Test( Value, '>=');
 end;
 
-function TPowerSQLBuilder.MajorEqual(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MajorEqual(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestDate( Value, '>=', Mask);
 end;
@@ -1231,37 +1231,37 @@ begin
   Result := Test( Value, DecimalValue, '>=');
 end;
 
-function TPowerSQLBuilder.MajorEqualOfDate(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MajorEqualOfDate(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfDate( Value, '>=', Mask);
 end;
 
-function TPowerSQLBuilder.MajorEqualOfTime(const Value: TDateTime;Seconds: Boolean; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MajorEqualOfTime(const Value: TDateTime;Seconds: Boolean; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfTime( Value, Seconds, '>=', Mask);
 end;
 
-function TPowerSQLBuilder.MajorOfDate(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MajorOfDate(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfDate( Value, '>', Mask);
 end;
 
-function TPowerSQLBuilder.MajorOfTime(const Value: TDateTime;Seconds: Boolean; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MajorOfTime(const Value: TDateTime;Seconds: Boolean; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfTime( Value, Seconds, '>', Mask);
 end;
 
-function TPowerSQLBuilder.Max(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Max(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' max(').Add( Value ).EndValues
 end;
 
-function TPowerSQLBuilder.Min(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Min(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' min(').Add( Value ).EndValues
 end;
 
-function TPowerSQLBuilder.Minor(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Minor(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestDate( Value, '<', Mask);
 end;
@@ -1286,12 +1286,12 @@ begin
   Result := Test( Value, DecimalValue, '<');
 end;
 
-function TPowerSQLBuilder.Minor(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Minor(const Value: String): TPowerSQLBuilder;
 begin
   Result := Test( Value, '<');
 end;
 
-function TPowerSQLBuilder.MinorEqual(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MinorEqual(const Value: String): TPowerSQLBuilder;
 begin
   Result := Test( Value, '<=');
 end;
@@ -1306,7 +1306,7 @@ begin
   Result := Test( Value, '<=');
 end;
 
-function TPowerSQLBuilder.MinorEqual(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MinorEqual(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestDate( Value, '<=', Mask);
 end;
@@ -1321,27 +1321,27 @@ begin
   Result := Test( Value, '<=');
 end;
 
-function TPowerSQLBuilder.MinorEqualOfDate(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MinorEqualOfDate(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfDate( Value, '<=', Mask);
 end;
 
-function TPowerSQLBuilder.MinorEqualOfTime(const Value: TDateTime;Seconds: Boolean; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MinorEqualOfTime(const Value: TDateTime;Seconds: Boolean; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfTime( Value, Seconds, '<=', Mask);
 end;
 
-function TPowerSQLBuilder.MinorOfDate(const Value: TDateTime; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MinorOfDate(const Value: TDateTime; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfDate( Value, '<', Mask);
 end;
 
-function TPowerSQLBuilder.MinorOfTime(const Value: TDateTime;Seconds: Boolean; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.MinorOfTime(const Value: TDateTime;Seconds: Boolean; Mask : String): TPowerSQLBuilder;
 begin
   Result := TestOfTime( Value, Seconds, '<', Mask);
 end;
 
-function TPowerSQLBuilder.ModifyColumn( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.ModifyColumn( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' modify column ').Add( Value );
 end;
@@ -1363,12 +1363,12 @@ begin
   Result := Add(', ');
 end;
 
-function TPowerSQLBuilder.NextField(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.NextField(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(', ').add( Value );
 end;
 
-function TPowerSQLBuilder.&OR( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.&OR( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add(' or ').Add( Value );
 end;
@@ -1378,7 +1378,7 @@ begin
   Result := Add(' order by');
 end;
 
-function TPowerSQLBuilder.&Not( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.&Not( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add(' not ').Add( Value );
 end;
@@ -1388,18 +1388,18 @@ begin
   Result := Add(' not in (')
 end;
 
-function TPowerSQLBuilder.Order_By( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.Order_By( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add(' order by ').Add( Value );
 end;
 
-function TPowerSQLBuilder.OutPut(Field: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.OutPut(Field: String): TPowerSQLBuilder;
 begin
   Result := Add(' output inserted.').Add(Trim(Field)).Add(' ');
 end;
 
 
-function TPowerSQLBuilder.OutPutField(Field: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.OutPutField(Field: String): TPowerSQLBuilder;
 begin
   Result := Add(', inserted.').Add(Trim(Field)).Add(' ');
 end;
@@ -1409,7 +1409,7 @@ begin
   Result := Add(' over (')
 end;
 
-function TPowerSQLBuilder.Partition_By(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Partition_By(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' partition by ').Add( Value );
 end;
@@ -1425,12 +1425,12 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.PrimaryKey(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.PrimaryKey(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' PRIMARY KEY ').Add( Value );
 end;
 
-function TPowerSQLBuilder.Returning(Field: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Returning(Field: String): TPowerSQLBuilder;
 begin
   Result := Add(' returning ').Add( Field );
 end;
@@ -1440,12 +1440,12 @@ begin
   Result := Add(' Right Join');
 end;
 
-function TPowerSQLBuilder.RightJoin( const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.RightJoin( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' Right Join ').Add( Value );
 end;
 
-function TPowerSQLBuilder.Select( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.Select( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add('select ').Add( Value );
 end;
@@ -1460,7 +1460,7 @@ begin
   Result := Add('select');
 end;
 
-function TPowerSQLBuilder.SelectFrom( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.SelectFrom( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add('select * from ').Add( Value );
 end;
@@ -1498,7 +1498,7 @@ begin
   Result := Add(' (')
 end;
 
-function TPowerSQLBuilder.Sum(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Sum(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' sum(').Add(Value).Add(')');
 end;
@@ -1508,17 +1508,17 @@ begin
   Result := Add(' sum(');
 end;
 
-function TPowerSQLBuilder.SumAs(const Value: WideString; asValue: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.SumAs(const Value: String; asValue: String): TPowerSQLBuilder;
 begin
   Result := Add(' sum(').Add(Value).Add(') as ').Add( asValue );
 end;
 
-function TPowerSQLBuilder.Test(const Value: Int64;Condition: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Test(const Value: Int64;Condition: String): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Condition ).Add(' ').Add( IntToStr( Value ) );
 end;
 
-function TPowerSQLBuilder.TestDate(Value: TDateTime;Condition: WideString; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.TestDate(Value: TDateTime;Condition: String; Mask : String): TPowerSQLBuilder;
 begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd hh:nn:ss';
@@ -1569,7 +1569,7 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.Test(const Value: Boolean;Condition: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Test(const Value: Boolean;Condition: String): TPowerSQLBuilder;
 begin
   case Self.FSGDBType of
     dbPostGreSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
@@ -1582,12 +1582,12 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.Test(const Value: Integer;Condition: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Test(const Value: Integer;Condition: String): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Condition ).Add(' ').Add( IntToStr( Value ) );
 end;
 
-function TPowerSQLBuilder.Test(const Value: WideString;Condition: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Test(const Value: String;Condition: String): TPowerSQLBuilder;
 begin
   if UpperCase(Value) = 'NULL' then
     Result := Add(' ').Add( Condition ).Add(' ').Add(Value)
@@ -1595,12 +1595,12 @@ begin
     Result := Add(' ').Add( Condition ).Add(' ').AddQuoted(Value);
 end;
 
-function TPowerSQLBuilder.Test(const Value: Double; DecimalValue: ShortInt;Condition: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Test(const Value: Double; DecimalValue: ShortInt;Condition: String): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Condition ).Add(' ').Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
 end;
 
-function TPowerSQLBuilder.TestOfDate(Value: TDateTime;Condition: WideString; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.TestOfDate(Value: TDateTime;Condition: String; Mask : String): TPowerSQLBuilder;
 begin
   if Mask = '' then
     Mask := 'yyyy.mm.dd';
@@ -1651,7 +1651,7 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.TestOfTime(const Value: TDateTime;Seconds: Boolean; Condition: WideString; Mask : WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.TestOfTime(const Value: TDateTime;Seconds: Boolean; Condition: String; Mask : String): TPowerSQLBuilder;
 begin
   if Mask = '' then
   begin
@@ -1709,17 +1709,17 @@ begin
   Result := Self;
 end;
 
-function TPowerSQLBuilder.Update( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.Update( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add('update ').Add( Value ).Add(' set ');
 end;
 
-function TPowerSQLBuilder.UpField(Field: WideString; const Value: Double; DecimalValue: ShortInt): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: String; const Value: Double; DecimalValue: ShortInt): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Equal( Value, DecimalValue );
 end;
 
-function TPowerSQLBuilder.UpField(Field: WideString; const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: String; const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Equal( Value );
 end;
@@ -1729,7 +1729,7 @@ begin
   Result := Add(' union ');
 end;
 
-function TPowerSQLBuilder.unique(const Field: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.unique(const Field: String): TPowerSQLBuilder;
 begin
   Result := Add(' UNIQUE ( ').AddQuoted( Field ).Add(') ');
 end;
@@ -1739,42 +1739,42 @@ begin
   Result := Add('update');
 end;
 
-function TPowerSQLBuilder.UpField(Field: WideString; const Value: Boolean): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: String; const Value: Boolean): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Equal( Value );
 end;
 
-function TPowerSQLBuilder.UpField(Field: WideString; const Value: Int64): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: String; const Value: Int64): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Equal( Value );
 end;
 
-function TPowerSQLBuilder.UpField(Field: WideString; const Value: Integer): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: String; const Value: Integer): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Equal( Value );
 end;
 
-function TPowerSQLBuilder.UpField(Field: WideString; const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: String; const Value: TDateTime; Mask : String ): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Equal( Value, Mask );
 end;
 
-function TPowerSQLBuilder.UpField(Field: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpField(Field: String): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Add(' = ');
 end;
 
-function TPowerSQLBuilder.UpFieldNull(const Field: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpFieldNull(const Field: String): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Add( ' = null ' );
 end;
 
-function TPowerSQLBuilder.UpFieldOfDate(Field: WideString; const Value: TDateTime; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpFieldOfDate(Field: String; const Value: TDateTime; Mask : String ): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).EqualOfDate( Value, Mask );
 end;
 
-function TPowerSQLBuilder.UpFieldOfTime(Field: WideString; const Value: TDateTime; Seconds: Boolean; Mask : WideString ): TPowerSQLBuilder;
+function TPowerSQLBuilder.UpFieldOfTime(Field: String; const Value: TDateTime; Seconds: Boolean; Mask : String ): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).EqualOfTime( Value, Seconds, Mask );
 end;
@@ -1784,7 +1784,7 @@ begin
   Result := Add(' Values (');
 end;
 
-function TPowerSQLBuilder.When(Condition: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.When(Condition: String): TPowerSQLBuilder;
 begin
   Result := Add(' when ').Add( Condition );
 end;
@@ -1794,13 +1794,13 @@ begin
   Result := Add(' when');
 end;
 
-function TPowerSQLBuilder.Where(const Value, Cast: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Where(const Value, Cast: String): TPowerSQLBuilder;
 begin
   Result := Add(' where ').Cast( Value, Cast );
   Self.FWhere := True;
 end;
 
-function TPowerSQLBuilder.Where( const Value : WideString ) : TPowerSQLBuilder;
+function TPowerSQLBuilder.Where( const Value : String ) : TPowerSQLBuilder;
 begin
   Result := Add(' where ').Add( Value );
   Self.FWhere := True;
@@ -1816,7 +1816,7 @@ begin
   Result := Add(' default ').Field( Value );
 end;
 
-function TPowerSQLBuilder.Default(const Value: WideString): TPowerSQLBuilder;
+function TPowerSQLBuilder.Default(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' default ').Field( Value );
 end;
