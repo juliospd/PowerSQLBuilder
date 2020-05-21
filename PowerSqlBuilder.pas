@@ -223,6 +223,7 @@ type
     function DropTable( const Value : String ) : TPowerSQLBuilder; virtual;
     function Union : TPowerSQLBuilder; virtual;
     function Over : TPowerSQLBuilder; virtual;
+    function All : TPowerSQLBuilder; overload; virtual;
 
     /// <summary>
     /// sP : Abre um Parentese Start Parent '('
@@ -577,6 +578,11 @@ end;
 function TPowerSQLBuilder.AddQuoted( const Value: String): TPowerSQLBuilder;
 begin
   Result := Add( QuotedStr( Value ) );
+end;
+
+function TPowerSQLBuilder.All: TPowerSQLBuilder;
+begin
+  Result := Add(' * ');
 end;
 
 function TPowerSQLBuilder.AlterColumn( const Value: String): TPowerSQLBuilder;
