@@ -224,6 +224,7 @@ type
     function Union : TPowerSQLBuilder; virtual;
     function Over : TPowerSQLBuilder; virtual;
     function All : TPowerSQLBuilder; overload; virtual;
+    function TruncateTable( const Value : String ) : TPowerSQLBuilder; virtual;
 
     /// <summary>
     /// sP : Abre um Parentese Start Parent '('
@@ -497,6 +498,11 @@ end;
 function TPowerSQLBuilder.Top(const Value: Integer): TPowerSQLBuilder;
 begin
   Result := Add(' TOP ').Field(Value);
+end;
+
+function TPowerSQLBuilder.TruncateTable( const Value: String): TPowerSQLBuilder;
+begin
+  Result := Add(' truncate table ').Add( Value );
 end;
 
 function TPowerSQLBuilder.&Then(Value: String): TPowerSQLBuilder;
