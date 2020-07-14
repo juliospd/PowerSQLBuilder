@@ -220,7 +220,12 @@ type
     function Sum( const Value : String ) : TPowerSQLBuilder;  overload; virtual;
     function SumAs( const Value : String; asValue : String ) : TPowerSQLBuilder; virtual;
     function having( const Value : String ) : TPowerSQLBuilder; virtual;
+    function CreateTable( const Value : String ) : TPowerSQLBuilder; virtual;
+    function AlterTable( const Value : String ) : TPowerSQLBuilder; virtual;
     function DropTable( const Value : String ) : TPowerSQLBuilder; virtual;
+    function CreateView( const Value : String ) : TPowerSQLBuilder; virtual;
+    function AlterView( const Value : String ) : TPowerSQLBuilder; virtual;
+    function DropView( const Value : String ) : TPowerSQLBuilder; virtual;
     function Union : TPowerSQLBuilder; virtual;
     function Over : TPowerSQLBuilder; virtual;
     function All : TPowerSQLBuilder; overload; virtual;
@@ -265,7 +270,6 @@ type
     function CountAs( const asValue : String ) : TPowerSQLBuilder; virtual;
     function Max(const Value : String ) : TPowerSQLBuilder; virtual;
     function Min(const Value : String ) : TPowerSQLBuilder; Virtual;
-    function AlterTable(const Value : String ) : TPowerSQLBuilder; virtual;
     function AutoIncrement(const Value : Integer ) : TPowerSQLBuilder; virtual;
     function EndIn : TPowerSQLBuilder; virtual;
     function EndOver : TPowerSQLBuilder; virtual;
@@ -601,6 +605,11 @@ begin
   Result := Add(' alter table ').Add( value );
 end;
 
+function TPowerSQLBuilder.AlterView(const Value: String): TPowerSQLBuilder;
+begin
+  Result := Add(' alter view ').Add( value );
+end;
+
 function TPowerSQLBuilder.BetWeen(const ValueStart, ValueEnd: Double; DecimalValue: ShortInt): TPowerSQLBuilder;
 begin
   Result := Add(' between ').Field( ValueStart, DecimalValue ).Add(' and ').Field( ValueEnd, DecimalValue );
@@ -662,6 +671,16 @@ constructor TPowerSQLBuilder.Create;
 begin
   Self.FValuePSB := TStringBuilder.Create;
   Self.FSGDBType := dbNenhum;
+end;
+
+function TPowerSQLBuilder.CreateTable(const Value: String): TPowerSQLBuilder;
+begin
+  Result := Add(' create table ').Add( Value );
+end;
+
+function TPowerSQLBuilder.CreateView(const Value: String): TPowerSQLBuilder;
+begin
+  Result := Add(' create view ').Add( Value );
 end;
 
 function TPowerSQLBuilder.Desc: TPowerSQLBuilder;
@@ -728,6 +747,11 @@ end;
 function TPowerSQLBuilder.DropTable(const Value : String ): TPowerSQLBuilder;
 begin
   Result := Add(' drop table ').Add( Value );
+end;
+
+function TPowerSQLBuilder.DropView(const Value: String): TPowerSQLBuilder;
+begin
+  Result := Add(' drop view ').Add( Value );
 end;
 
 function TPowerSQLBuilder.Distinct: TPowerSQLBuilder;
