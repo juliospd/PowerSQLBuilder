@@ -21,6 +21,7 @@
   no endereço 59 Temple Street, Suite 330, Boston, MA 02111-1307 USA.
   Você também pode obter uma copia da licença em:
   http://www.opensource.org/licenses/lgpl-license.php
+  
 }
 unit PowerSqlBuilder;
 
