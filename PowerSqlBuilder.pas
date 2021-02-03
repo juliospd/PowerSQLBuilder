@@ -457,7 +457,7 @@ end;
 
 function TPowerSQLBuilder.&Else(Value: String): TPowerSQLBuilder;
 begin
-  Result := Add(' else ').Add( Value );
+  Result := Add(' else ').AddQuoted( Value );
 end;
 
 function TPowerSQLBuilder.&Else(Value: Double; DecimalValue: ShortInt): TPowerSQLBuilder;
@@ -512,7 +512,7 @@ end;
 
 function TPowerSQLBuilder.&Then(Value: String): TPowerSQLBuilder;
 begin
-  Result := Add(' then ').Add( Value );
+  Result := Add(' then ').AddQuoted( Value );
 end;
 
 function TPowerSQLBuilder.&Then(Value: Double; DecimalValue: ShortInt): TPowerSQLBuilder;
