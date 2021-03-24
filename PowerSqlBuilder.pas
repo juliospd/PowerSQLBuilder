@@ -304,7 +304,8 @@ type
     function &On( const Value : String ) : TPowerSQLBuilder; virtual;
     function &In : TPowerSQLBuilder;  overload; virtual;
     function &In( const Value : String ) : TPowerSQLBuilder; overload; virtual;
-    function &Not( const Value : String ) : TPowerSQLBuilder; virtual;
+    function &Not : TPowerSQLBuilder; overload; virtual;
+    function &Not( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function &Null : TPowerSQLBuilder; virtual;
     function &Case( Condition : String ) : TPowerSQLBuilder; overload; virtual;
     function &Case : TPowerSQLBuilder; overload; virtual;
@@ -563,6 +564,11 @@ end;
 function TPowerSQLBuilder.&As: TPowerSQLBuilder;
 begin
   Result := Add(' as ');
+end;
+
+function TPowerSQLBuilder.&Not: TPowerSQLBuilder;
+begin
+  Result := Add(' not ');
 end;
 
 function TPowerSQLBuilder.Add(const Value: String): TPowerSQLBuilder;
