@@ -1500,7 +1500,7 @@ end;
 
 function TPowerSQLBuilder.Select: TPowerSQLBuilder;
 begin
-  Result := Add('select');
+  Result := Add('select ');
 end;
 
 function TPowerSQLBuilder.SelectFrom( const Value : String ) : TPowerSQLBuilder;
