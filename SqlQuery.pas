@@ -1360,13 +1360,17 @@ var
 begin
   if Assigned( FieldBlob ) then
   begin
-    I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
-    Self.FFieldBlob[I].FFieldName := FieldName;
-    Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
+    if FieldBlob.Size > 0 then
+    begin
+      I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
+      Self.FFieldBlob[I].FFieldName := FieldName;
+      Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
 
-    Self.Add(' :' + Trim(FieldName) );
+      Self.Add(' :' + Trim(FieldName) );
+    end
+    else Self.Add('null');
   end
-  else Self.Add('null ');
+  else Self.Add('null');
 
   Result := Self;
 end;
