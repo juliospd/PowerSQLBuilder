@@ -1432,13 +1432,17 @@ function TSQLQuery.getBlob(NameField: String): TMemoryStream;
 var
   FieldStream : TStream;
 begin
-  try
-    FieldStream := Self.FDataSet.CreateBlobStream( Self.FDataSet.FieldByName( NameField ), bmRead );
-    Result := TMemoryStream.Create;
-    Result.LoadFromStream( FieldStream );
-  finally
-    FreeAndNil( FieldStream );
-  end;
+  if not Self.FDataSet.FieldByName( NameField ).IsNull then
+  begin
+    try
+      FieldStream := Self.FDataSet.CreateBlobStream( Self.FDataSet.FieldByName( NameField ), bmRead );
+      Result := TMemoryStream.Create;
+      Result.LoadFromStream( FieldStream );
+    finally
+      FreeAndNil( FieldStream );
+    end;
+  end
+  else Result := Nil;
 end;
 
 function TSQLQuery.getBoolean(NameField: String): Boolean;
