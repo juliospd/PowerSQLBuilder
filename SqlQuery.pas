@@ -152,9 +152,10 @@ type
     function Post : TSQLQuery; virtual;
     function Close : TSQLQuery; virtual;
     //
+    function GetString : String; overload;
     function getInteger( NameField : String ) : Integer; virtual;
     function getLongInt( NameField : String ) : Int64; virtual;
-    function getWideString( NameField : String ) : String; virtual;
+    function getString( NameField : String ) : String; overload; virtual;
     function getAnsiString( NameField : String ) : AnsiString; virtual;
     function getFloat( NameField : String ) : Double; virtual;
     function getCurrency( NameField : String ) : Double; virtual;
@@ -1349,7 +1350,7 @@ begin
   Result := Self.FDataSet.FieldByName(NameField).AsInteger;
 end;
 
-function TSQLQuery.getWideString(NameField: String): String;
+function TSQLQuery.getString(NameField: String): String;
 begin
   Result := Trim(Self.FDataSet.FieldByName(NameField).AsString);
 end;
@@ -1430,6 +1431,11 @@ end;
 function TSQLQuery.getLongInt(NameField: String): Int64;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsLargeInt;
+end;
+
+function TSQLQuery.GetString: String;
+begin
+  Result := inherited GetString;
 end;
 
 function TSQLQuery.getBlob(NameField: String): TMemoryStream;
