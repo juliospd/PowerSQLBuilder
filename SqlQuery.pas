@@ -161,6 +161,7 @@ type
     function getBoolean( NameField : String ) : Boolean; virtual;
     function getDateTime( NameField : String ) : TDateTime; virtual;
     function getBlob( NameField : String ) : TMemoryStream; virtual;
+    function getString( NameField : String ) : String; overload;
     //
     function isEmpty( NameField : String ) : Boolean; virtual;
 
@@ -1430,6 +1431,11 @@ end;
 function TSQLQuery.getLongInt(NameField: String): Int64;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsLargeInt;
+end;
+
+function TSQLQuery.getString(NameField: String): String;
+begin
+  Result := Trim(Self.FDataSet.FieldByName(NameField).AsString);
 end;
 
 function TSQLQuery.getBlob(NameField: String): TMemoryStream;
