@@ -115,7 +115,7 @@ type
     function AddQuoted(const Value : String) : TPowerSQLBuilder; virtual;
     function AddLine(const Value : String) : TPowerSQLBuilder; virtual;
     function Clear : TPowerSQLBuilder; virtual;
-    function GetString : String; virtual;
+    function GetString : String;
     // Teste de Igual a
     function Equal( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
