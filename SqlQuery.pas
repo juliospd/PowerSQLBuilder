@@ -1457,7 +1457,10 @@ end;
 
 function TSQLQuery.getBoolean(NameField: String): Boolean;
 begin
-  Result := Self.FDataSet.FieldByName(NameField).AsBoolean;
+  if SGDBType = dbMySQL then
+    Result := (Self.FDataSet.FieldByName(NameField).AsInteger = 1)
+  else
+    Result := Self.FDataSet.FieldByName(NameField).AsBoolean;
 end;
 
 function TSQLQuery.getDateTime(NameField: String): TDateTime;
