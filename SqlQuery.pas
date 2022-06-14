@@ -109,6 +109,7 @@ type
     property DataSet : TDataSet read FDataSet write SetDataSet;
     property LogSQL : Boolean read FLogSQL write SetLogSQL;
     property PathLog : String read FPathLog write SetPathLog;
+    property ListFieldBlob : TList<TBlobFieldsinSQL> read FFieldBlob write FFieldBlob;
 
     function FieldBlob( FieldName : String; FieldBlob : TMemoryStream ) : TSQLQuery; virtual;
     function UpFieldBlob( FieldName : String; FieldBlob : TMemoryStream ) : TSQLQuery; virtual;
@@ -1314,12 +1315,17 @@ var
 begin
   if Assigned( FieldBlob ) then
   begin
-    I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
-    Self.FFieldBlob[I].FFieldName := FieldName;
-    Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
+    if FieldBlob.Size > 0 then
+    begin
+      I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
+      Self.FFieldBlob[I].FFieldName := FieldName;
+      Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
 
-    Self.Add( ' ' + FieldName + ' = :' + Trim(FieldName) );
-  end;
+      Self.Add( ' ' + FieldName + ' = :' + Trim(FieldName) );
+    end
+    else Self.Add( ' ' + FieldName + ' = null' );
+  end
+  else Self.Add( ' ' + FieldName + ' = null' );
 
   Result := Self;
 end;
@@ -1359,8 +1365,8 @@ begin
     if FieldBlob.Size > 0 then
     begin
       I := Self.FFieldBlob.Add( TBlobFieldsinSQL.Create );
-      Self.FFieldBlob[I].FFieldName := FieldName;
-      Self.FFieldBlob[I].FFieldBlob.LoadFromStream( FieldBlob );
+      Self.FFieldBlob[I].FieldName := FieldName;
+      Self.FFieldBlob[I].FieldBlob.LoadFromStream( FieldBlob );
 
       Self.Add(' :' + Trim(FieldName) );
     end
@@ -1430,7 +1436,7 @@ end;
 
 function TSQLQuery.getString(NameField: String): String;
 begin
-  Result := Trim(Self.FDataSet.FieldByName(NameField).AsString);
+  Result := StringReplace(Self.FDataSet.FieldByName(NameField).AsString.Trim, 'null', '', [rfReplaceAll]);
 end;
 
 function TSQLQuery.getWideString(NameField: String): String;
