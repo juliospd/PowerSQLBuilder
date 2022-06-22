@@ -408,6 +408,15 @@ begin
               end
               else raise;
             end;
+            dbSQLLite:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
             dbNenhum:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
@@ -487,6 +496,15 @@ begin
               else raise;
             end;
             dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbSQLLite:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
               begin
@@ -589,6 +607,15 @@ begin
               end
               else raise;
             end;
+            dbSQLLite:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
             dbNenhum:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
@@ -668,6 +695,15 @@ begin
               else raise;
             end;
             dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbSQLLite:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
               begin
@@ -770,6 +806,15 @@ begin
               end
               else raise;
             end;
+            dbSQLLite:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
             dbNenhum:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
@@ -849,6 +894,15 @@ begin
               else raise;
             end;
             dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Disconnect;
+                Connection.Connect;
+              end
+              else raise;
+            end;
+            dbSQLLite:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
               begin
@@ -959,6 +1013,15 @@ begin
               end
               else raise;
             end;
+            dbSQLLite:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
             dbNenhum:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
@@ -1060,6 +1123,15 @@ begin
               end
               else raise;
             end;
+            dbSQLLite:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
             dbNenhum:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
@@ -1150,6 +1222,15 @@ begin
               else raise;
             end;
             dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Disconnect;
+                Query.Connection.Connect;
+              end
+              else raise;
+            end;
+            dbSQLLite:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
               begin
@@ -1594,6 +1675,15 @@ begin
               end
               else raise;
             end;
+            dbSQLLite:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
             dbNenhum:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
@@ -1673,6 +1763,15 @@ begin
               else raise;
             end;
             dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Connection.Connected := False;
+                Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbSQLLite:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
               begin
@@ -1793,6 +1892,15 @@ begin
               else raise;
             end;
             dbFireBird:
+            begin
+              if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
+              begin
+                Query.Connection.Connected := False;
+                Query.Connection.Connected := True;
+              end
+              else raise;
+            end;
+            dbSQLLite:
             begin
               if (Pos('SERVER', UpperCase(e.Message) ) > 0) then
               begin

@@ -60,7 +60,7 @@ type
   TOpenU = procedure (var query : TUniQuery ) of object;
   TOpenA = procedure (var query : TADOQuery ) of object;
 
-  TSGDBType = ( dbPostGreSQL, dbMySQL, dbMsSQL, dbFireBird, dbNenhum );
+  TSGDBType = ( dbPostGreSQL, dbMySQL, dbMsSQL, dbFireBird, dbSQLLite, dbNenhum );
 
   /// <summary>
   ///   PowerSQLBuilder é uma classe de manipulação SQL
@@ -348,6 +348,7 @@ type
     function FireBird : TPowerSQLBuilder;
     function MSSQL : TPowerSQLBuilder;
     function MySQL : TPowerSQLBuilder;
+    function SQLLite : TPowerSQLBuilder;
 
     constructor Create; virtual;
     destructor Destroy; override;
@@ -895,7 +896,7 @@ begin
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
-    dbMySQL:
+    dbMySQL, dbSQLLite:
     begin
       if DateOf(Value) = 0 then
         Add( QuotedStr( '0000.00.00 00:00:00' ) )
@@ -937,7 +938,7 @@ function TPowerSQLBuilder.Field(const Value: Boolean): TPowerSQLBuilder;
 begin
   case Self.FSGDBType of
     dbPostGreSQL: Add( IfThen(Value, 'true', 'false') );
-    dbMySQL: Add( IfThen(Value, '1', '0') );
+    dbMySQL, dbSQLLite: Add( IfThen(Value, '1', '0') );
     dbMsSQL: Add( IfThen(Value, '1', '0') );
     dbFireBird: Add( IfThen(Value, 'true', 'false') );
     dbNenhum: Add( IfThen(Value, 'true', 'false') );
@@ -972,7 +973,7 @@ begin
       else
         Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
     end;
-    dbMySQL:
+    dbMySQL, dbSQLLite:
     begin
       if DateOf(Value) = 0 then
         Add( QuotedStr( '0000.00.00' ) )
@@ -1023,7 +1024,7 @@ begin
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
     end;
-    dbMySQL:
+    dbMySQL, dbSQLLite:
     begin
       if DateOf(Value) = 0 then
       begin
@@ -1541,6 +1542,12 @@ begin
   Result := Add(' (')
 end;
 
+function TPowerSQLBuilder.SQLLite: TPowerSQLBuilder;
+begin
+  Self.FSGDBType := dbSQLLite;
+  Result := Self;
+end;
+
 function TPowerSQLBuilder.Sum(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' sum(').Add(Value).Add(')');
@@ -1579,7 +1586,7 @@ begin
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
-    dbMySQL:
+    dbMySQL, dbSQLLite:
     begin
       if DateOf(Value) = 0 then
         Add( QuotedStr( '0000.00.00 00:00:00' ) )
@@ -1616,7 +1623,7 @@ function TPowerSQLBuilder.Test(const Value: Boolean;Condition: String): TPowerSQ
 begin
   case Self.FSGDBType of
     dbPostGreSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
-    dbMySQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
+    dbMySQL, dbSQLLite: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
     dbMsSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
     dbFireBird: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
     dbNenhum: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
@@ -1661,7 +1668,7 @@ begin
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
-    dbMySQL:
+    dbMySQL, dbSQLLite:
     begin
       if DateOf(Value) = 0 then
         Add( QuotedStr( '0000.00.00 00:00:00' ) )
@@ -1714,7 +1721,7 @@ begin
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
     end;
-    dbMySQL:
+    dbMySQL, dbSQLLite:
     begin
       if DateOf(Value) = 0 then
       begin
