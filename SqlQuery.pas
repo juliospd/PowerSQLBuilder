@@ -1731,7 +1731,7 @@ begin
       except
         on e: Exception do
         begin
-          if Self.FLogSQL then
+           if Self.FLogSQL then
             WriteLog( e.Message );
 
           case SGDBType of
