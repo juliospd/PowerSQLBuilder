@@ -122,9 +122,9 @@
         <BT_BuildType>Debug</BT_BuildType>
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <DCC_DcpOutput>D:\DataproFactory\Projetos\MSSQL\Shared\bin</DCC_DcpOutput>
+        <DCC_DcpOutput>D:\DataproFactory\Projetos\Utils\Shared\</DCC_DcpOutput>
         <DCC_CBuilderOutput>None</DCC_CBuilderOutput>
-        <DCC_BplOutput>D:\DataproFactory\Projetos\MSSQL\Shared\bin</DCC_BplOutput>
+        <DCC_BplOutput>D:\DataproFactory\Projetos\Utils\Shared\</DCC_BplOutput>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>

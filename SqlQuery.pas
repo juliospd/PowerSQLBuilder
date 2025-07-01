@@ -1543,6 +1543,10 @@ begin
   begin
     try
       FieldStream := Self.FDataSet.CreateBlobStream( Self.FDataSet.FieldByName( NameField ), bmRead );
+
+      if Value = Nil then
+        Value := TMemoryStream.Create;
+
       Value.LoadFromStream( FieldStream );
     finally
       FreeAndNil( FieldStream );
