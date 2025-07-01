@@ -60,7 +60,7 @@ type
   TOpenU = procedure (var query : TUniQuery ) of object;
   TOpenA = procedure (var query : TADOQuery ) of object;
 
-  TSGDBType = ( dbPostGreSQL, dbMySQL, dbMsSQL, dbFireBird, dbSQLLite, dbNenhum );
+  TSGDBType = ( dbPostGreSQL, dbMySQL, dbMsSQL, dbFireBird, dbSQLLite, dbDB2, dbMongo, dbNenhum );
 
   /// <summary>
   ///   PowerSQLBuilder é uma classe de manipulação SQL
@@ -173,6 +173,8 @@ type
     // Field usado na inserção
     function Field( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
+    function Field( Value : TDate; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
+    function Field( Value : TTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function Field( Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Int64 ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Integer ) : TPowerSQLBuilder; overload; virtual;
@@ -231,6 +233,7 @@ type
     function Over : TPowerSQLBuilder; virtual;
     function All : TPowerSQLBuilder; overload; virtual;
     function TruncateTable( const Value : String ) : TPowerSQLBuilder; virtual;
+    function onDuplicateKey : TPowerSQLBuilder; virtual;
 
     /// <summary>
     /// sP : Abre um Parentese Start Parent '('
@@ -349,6 +352,8 @@ type
     function MSSQL : TPowerSQLBuilder;
     function MySQL : TPowerSQLBuilder;
     function SQLLite : TPowerSQLBuilder;
+    function DB2 : TPowerSQLBuilder;
+    function Mongo : TPowerSQLBuilder;
 
     constructor Create; virtual;
     destructor Destroy; override;
@@ -361,6 +366,11 @@ implementation
 function TPowerSQLBuilder.&ON(const Value: String): TPowerSQLBuilder;
 begin
   Result := Add(' on (').Add( Value ).EndValues;
+end;
+
+function TPowerSQLBuilder.onDuplicateKey: TPowerSQLBuilder;
+begin
+  Result := Add(' ON DUPLICATE KEY UPDATE ');
 end;
 
 function TPowerSQLBuilder.Open(var query: TADOQuery): TPowerSQLBuilder;
@@ -889,7 +899,7 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbPostGreSQL:
+    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
@@ -900,27 +910,6 @@ begin
     begin
       if DateOf(Value) = 0 then
         Add( QuotedStr( '0000.00.00 00:00:00' ) )
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbMsSQL:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbFireBird:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbNenhum:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
@@ -937,11 +926,61 @@ end;
 function TPowerSQLBuilder.Field(const Value: Boolean): TPowerSQLBuilder;
 begin
   case Self.FSGDBType of
-    dbPostGreSQL: Add( IfThen(Value, 'true', 'false') );
-    dbMySQL, dbSQLLite: Add( IfThen(Value, '1', '0') );
-    dbMsSQL: Add( IfThen(Value, '1', '0') );
-    dbFireBird: Add( IfThen(Value, 'true', 'false') );
-    dbNenhum: Add( IfThen(Value, 'true', 'false') );
+    dbPostGreSQL, dbFireBird, dbDB2, dbMongo, dbNenhum: Add( IfThen(Value, 'true', 'false') );
+    dbMySQL, dbSQLLite, dbMsSQL: Add( IfThen(Value, '1', '0') );
+  end;
+
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.Field(Value: TTime; Mask: String): TPowerSQLBuilder;
+begin
+  if Mask = '' then
+    Mask := 'hh:nn:ss';
+
+  case Self.FSGDBType of
+    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    begin
+      if Value = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMySQL, dbSQLLite:
+    begin
+      if Value = 0 then
+        Add( QuotedStr( '00:00:00' ) )
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+  end;
+
+  Result := Self;
+end;
+
+function TPowerSQLBuilder.Field(Value: TDate; Mask: String): TPowerSQLBuilder;
+begin
+  if Mask = '' then
+    Mask := 'yyyy.mm.dd';
+
+  if YearOf(Value) < 1890 then
+    Value := 0;
+
+  case Self.FSGDBType of
+    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    begin
+      if Value = 0 then
+        Add('null')
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
+    dbMySQL, dbSQLLite:
+    begin
+      if Value = 0 then
+        Add( QuotedStr( '0000.00.00' ) )
+      else
+        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
+    end;
   end;
 
   Result := Self;
@@ -966,7 +1005,7 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbPostGreSQL:
+    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
@@ -979,27 +1018,6 @@ begin
         Add( QuotedStr( '0000.00.00' ) )
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbMsSQL:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
-    end;
-    dbFireBird:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
-    end;
-    dbNenhum:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
     end;
   end;
 
@@ -1017,7 +1035,7 @@ begin
   end;
 
   case Self.FSGDBType of
-    dbPostGreSQL:
+    dbPostGreSQL, dbFireBird, dbMsSQL, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
@@ -1035,27 +1053,6 @@ begin
       end
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbMsSQL:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
-    end;
-    dbFireBird:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
-    end;
-    dbNenhum:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
     end;
   end;
 
@@ -1390,6 +1387,12 @@ begin
   Result := Add(' modify column ').Add( Value );
 end;
 
+function TPowerSQLBuilder.Mongo: TPowerSQLBuilder;
+begin
+  Self.FSGDBType := dbMongo;
+  Result := Self;
+end;
+
 function TPowerSQLBuilder.MSSQL: TPowerSQLBuilder;
 begin
   Self.FSGDBType := dbMsSQL;
@@ -1579,7 +1582,7 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbPostGreSQL:
+    dbPostGreSQL, dbFireBird, dbMsSQL, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
@@ -1593,27 +1596,6 @@ begin
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
-    dbMsSQL:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbFireBird:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbNenhum:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
   end;
 
   Result := Self;
@@ -1622,11 +1604,8 @@ end;
 function TPowerSQLBuilder.Test(const Value: Boolean;Condition: String): TPowerSQLBuilder;
 begin
   case Self.FSGDBType of
-    dbPostGreSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
-    dbMySQL, dbSQLLite: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
-    dbMsSQL: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
-    dbFireBird: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
-    dbNenhum: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
+    dbPostGreSQL, dbFireBird, dbDB2, dbMongo, dbNenhum: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, 'true', 'false') );
+    dbMsSQL, dbMySQL, dbSQLLite: Add(' ').Add( Condition ).Add(' ').Add( IfThen(Value, '1', '0') );
   end;
 
   Result := Self;
@@ -1661,7 +1640,7 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbPostGreSQL:
+    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
@@ -1671,28 +1650,7 @@ begin
     dbMySQL, dbSQLLite:
     begin
       if DateOf(Value) = 0 then
-        Add( QuotedStr( '0000.00.00 00:00:00' ) )
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbMsSQL:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbFireBird:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbNenhum:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
+        Add( QuotedStr( '0000.00.00' ) )
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
@@ -1714,7 +1672,7 @@ begin
   Add(' ').Add( Condition ).Add(' ');
 
   case Self.FSGDBType of
-    dbPostGreSQL:
+    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
@@ -1730,29 +1688,7 @@ begin
         else
           Add( QuotedStr( '00:00' ) )
       end
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
-    end;
-    dbMsSQL:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
-    end;
-    dbFireBird:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
-    end;
-    dbNenhum:
-    begin
-      if DateOf(Value) = 0 then
-        Add('null')
-      else
-        Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
+      else Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
   end;
 
@@ -1864,6 +1800,12 @@ end;
 function TPowerSQLBuilder.Default(const Value: Double): TPowerSQLBuilder;
 begin
   Result := Add(' default ').Field( Value );
+end;
+
+function TPowerSQLBuilder.DB2: TPowerSQLBuilder;
+begin
+  Self.FSGDBType := dbDB2;
+  Result := Self;
 end;
 
 function TPowerSQLBuilder.Default(const Value: String): TPowerSQLBuilder;
