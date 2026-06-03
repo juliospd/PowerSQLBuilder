@@ -168,6 +168,7 @@ type
     function getDateTime( NameField : String ) : TDateTime; virtual;
     function getBlob(Value : TMemoryStream; NameField : String ) : TMemoryStream; virtual;
     function getString( NameField : String ) : String; overload;
+    function getGUID(NameField: String): TGUID;
     //
     function isEmpty( NameField : String ) : Boolean; virtual;
 
@@ -1513,6 +1514,19 @@ end;
 function TSQLQuery.getFloat(NameField: String): Double;
 begin
   Result := Self.FDataSet.FieldByName(NameField).AsFloat;
+end;
+
+function TSQLQuery.getGUID(NameField: String): TGUID;
+var
+  Bytes: TBytes;
+begin
+  Result := TGUID.Empty;
+  if Self.FDataSet.FieldByName(NameField).IsNull then
+    Exit;
+  Bytes := Self.FDataSet.FieldByName(NameField).AsBytes;
+  if Length(Bytes) <> SizeOf(TGUID) then
+    Exit;
+  Move(Bytes[0], Result, SizeOf(TGUID));
 end;
 
 function TSQLQuery.getLongInt(NameField: String): Int64;

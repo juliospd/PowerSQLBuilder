@@ -38,9 +38,9 @@ uses
   FireDAC.DApt.Intf,FireDAC.DApt, FireDAC.Phys.PGDef, FireDAC.VCLUI.Wait,
   FireDAC.Comp.UI, FireDAC.Phys.PG, FireDAC.Comp.DataSet, FireDAC.Comp.Client,
   {ADO}
-  Data.Win.ADODB,
+  Data.Win.ADODB, System.NetEncoding,
   {UniDac}
-  MemDS, DBAccess, Uni;
+  MemDS, DBAccess, Uni, IdHashMessageDigest;
 
 type
   TExecuteZc = procedure (var Connection : TZConnection ) of object;
@@ -76,10 +76,13 @@ type
   /// <remarks>
   ///   Para saber mais entre no site https://github.com/juliospd/PowerSQLBuilder
   /// </remarks>
+
   TPowerSQLBuilder = class(TObject)
   private
     FValuePSB : TStringBuilder;
-    FSGDBType: TSGDBType;
+    FValueHash : TStringBuilder;
+
+    FSGDBType : TSGDBType;
     FWhere : Boolean;
 
     FOpenFire: TOpenF;
@@ -110,13 +113,17 @@ type
     procedure SetADO( ExecuteADOC : TExecuteAc; ExecuteADO : TExecuteA; OpenADO : TOpenA );
   public
     property SGDBType : TSGDBType read FSGDBType;
+    property ValueHash : TStringBuilder read FValueHash write FValueHash;
     // Funções simples
     function Add(const Value : String) : TPowerSQLBuilder; virtual;
     function AddQuoted(const Value : String) : TPowerSQLBuilder; virtual;
     function AddLine(const Value : String) : TPowerSQLBuilder; virtual;
     function Clear : TPowerSQLBuilder; virtual;
+    function ClearHash : TPowerSQLBuilder; virtual;
     function GetString : String;
+    function GetHash : String;
     // Teste de Igual a
+    function Equal( const Value : TGUID ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Equal( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
@@ -171,6 +178,7 @@ type
     function DifferentOfDate( const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     function DifferentOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Field usado na inserção
+    function Field(const Value : TGUID) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function Field( const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function Field( Value : TDate; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
@@ -184,6 +192,7 @@ type
     function FieldOfTime( const Value : TDateTime; Seconds : Boolean = True; Mask : String = '' ) : TPowerSQLBuilder; virtual;
     // Campo e valor usado no Update
     function UpField( Field : String ) : TPowerSQLBuilder; overload; virtual;
+    function UpField( Field : String; Value: TGUID ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : String; const Value : String ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : String; const Value : Double; DecimalValue : ShortInt = 2 ) : TPowerSQLBuilder; overload; virtual;
     function UpField( Field : String; const Value : TDateTime; Mask : String = '' ) : TPowerSQLBuilder; overload; virtual;
@@ -670,6 +679,12 @@ begin
   Result := Self;
 end;
 
+function TPowerSQLBuilder.ClearHash: TPowerSQLBuilder;
+begin
+  Self.FValueHash.Clear;
+  Result := Self;
+end;
+
 function TPowerSQLBuilder.constraint(const Field: String): TPowerSQLBuilder;
 begin
   Result := Add(' constraint ').Add( Field );
@@ -688,6 +703,7 @@ end;
 constructor TPowerSQLBuilder.Create;
 begin
   Self.FValuePSB := TStringBuilder.Create;
+  Self.FValueHash := TStringBuilder.Create;
   Self.FSGDBType := dbNenhum;
 end;
 
@@ -709,6 +725,7 @@ end;
 destructor TPowerSQLBuilder.Destroy;
 begin
   FreeAndNil( Self.FValuePSB );
+  FreeAndNil( Self.FValueHash );
   inherited;
 end;
 
@@ -827,6 +844,19 @@ begin
   Result := Test( Value, '=' );
 end;
 
+function TPowerSQLBuilder.Equal(const Value: TGUID): TPowerSQLBuilder;
+var
+  Buffer: array[0..15] of Byte;
+  HexBuffer: array[0..31] of Char;
+  Hex: string;
+begin
+  Move(Value, Buffer, SizeOf(Buffer));
+  BinToHex(Buffer, HexBuffer, SizeOf(Buffer));
+  SetString(Hex, PChar(@HexBuffer[0]), SizeOf(Buffer) * 2);
+  Hex := LowerCase(Hex);
+  Result := Add(' = UNHEX(''' + Hex + ''')');
+end;
+
 function TPowerSQLBuilder.Equal(const Value: Int64): TPowerSQLBuilder;
 begin
   Result := Test( Value, '=' );
@@ -899,14 +929,14 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    dbMySQL, dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
-    dbMySQL, dbSQLLite:
+    dbSQLLite:
     begin
       if DateOf(Value) = 0 then
         Add( QuotedStr( '0000.00.00 00:00:00' ) )
@@ -931,6 +961,18 @@ begin
   end;
 
   Result := Self;
+end;
+
+function TPowerSQLBuilder.Field(const Value: TGUID): TPowerSQLBuilder;
+var
+  Buffer: array[0..15] of Byte;
+  HexBuffer: array[0..31] of Char;
+  HexStr: string;
+begin
+  Move(Value, Buffer, SizeOf(Buffer));
+  BinToHex(Buffer, HexBuffer, SizeOf(Buffer));
+  SetString(HexStr, PChar(@HexBuffer[0]), SizeOf(Buffer) * 2);
+  Result := Add('UNHEX(''' + LowerCase(HexStr) + ''')');
 end;
 
 function TPowerSQLBuilder.Field(Value: TTime; Mask: String): TPowerSQLBuilder;
@@ -967,14 +1009,14 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    dbMySQL, dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if Value = 0 then
         Add('null')
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
-    dbMySQL, dbSQLLite:
+    dbSQLLite:
     begin
       if Value = 0 then
         Add( QuotedStr( '0000.00.00' ) )
@@ -1005,14 +1047,14 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    dbMySQL, dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
       else
         Add( QuotedStr( FormatDateTime(Mask, Value ) ) );
     end;
-    dbMySQL, dbSQLLite:
+    dbSQLLite:
     begin
       if DateOf(Value) = 0 then
         Add( QuotedStr( '0000.00.00' ) )
@@ -1035,14 +1077,14 @@ begin
   end;
 
   case Self.FSGDBType of
-    dbPostGreSQL, dbFireBird, dbMsSQL, dbDB2, dbMongo, dbNenhum:
+    dbMySQL, dbPostGreSQL, dbFireBird, dbMsSQL, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
     end;
-    dbMySQL, dbSQLLite:
+    dbSQLLite:
     begin
       if DateOf(Value) = 0 then
       begin
@@ -1103,6 +1145,19 @@ end;
 function TPowerSQLBuilder.Field(const Value: Double; DecimalValue : ShortInt = 2): TPowerSQLBuilder;
 begin
   Result := Add( StringReplace(FormatFloat('#0.' + Format('%.' + IntToStr(DecimalValue) +'d', [0]), Value ),',','.',[rfReplaceAll]) );
+end;
+
+function TPowerSQLBuilder.GetHash: String;
+var
+  idmd5 : TIdHashMessageDigest5;
+begin
+  idmd5 := TIdHashMessageDigest5.Create;
+  try
+    Result := idmd5.HashStringAsHex(Self.FValueHash.ToString);
+    Self.FValueHash.Clear;
+  finally
+    FreeAndNil( idmd5 );
+  end;
 end;
 
 function TPowerSQLBuilder.GetJson(var Query: TZQuery; NameArray: String): String;
@@ -1582,14 +1637,14 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbPostGreSQL, dbFireBird, dbMsSQL, dbDB2, dbMongo, dbNenhum:
+    dbMySQL, dbPostGreSQL, dbFireBird, dbMsSQL, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
-    dbMySQL, dbSQLLite:
+    dbSQLLite:
     begin
       if DateOf(Value) = 0 then
         Add( QuotedStr( '0000.00.00 00:00:00' ) )
@@ -1640,14 +1695,14 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    dbMySQL, dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) );
     end;
-    dbMySQL, dbSQLLite:
+    dbSQLLite:
     begin
       if DateOf(Value) = 0 then
         Add( QuotedStr( '0000.00.00' ) )
@@ -1672,14 +1727,14 @@ begin
   Add(' ').Add( Condition ).Add(' ');
 
   case Self.FSGDBType of
-    dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    dbMySQL, dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
       else
         Add( QuotedStr( FormatDateTime( Mask, Value ) ) )
     end;
-    dbMySQL, dbSQLLite:
+    dbSQLLite:
     begin
       if DateOf(Value) = 0 then
       begin
@@ -1728,6 +1783,18 @@ end;
 function TPowerSQLBuilder.UpField(Field: String; const Value: Boolean): TPowerSQLBuilder;
 begin
   Result := Add(' ').Add( Field ).Equal( Value );
+end;
+
+function TPowerSQLBuilder.UpField(Field: String; Value: TGUID): TPowerSQLBuilder;
+var
+  Buffer: array[0..15] of Byte;
+  HexBuffer: array[0..31] of Char;
+  Hex : String;
+begin
+  Move(Value, Buffer, SizeOf(Buffer));
+  BinToHex(Buffer, HexBuffer, SizeOf(Buffer));
+  SetString(Hex, PChar(@HexBuffer[0]), SizeOf(Buffer) * 2);
+  Result := Add(' ').Add(Field).Add(' = UNHEX(''').Add( LowerCase(Hex) ).Add(''')');
 end;
 
 function TPowerSQLBuilder.UpField(Field: String; const Value: Int64): TPowerSQLBuilder;
