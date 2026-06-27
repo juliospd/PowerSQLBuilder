@@ -923,13 +923,13 @@ end;
 function TPowerSQLBuilder.Field(Value: TDateTime; Mask : String ): TPowerSQLBuilder;
 begin
   if Mask = '' then
-    Mask := 'yyyy.mm.dd hh:nn:ss';
+    Mask := 'yyyy-mm-dd hh:nn:ss';
 
   if YearOf(Value) < 1890 then
     Value := 0;
 
   case Self.FSGDBType of
-    dbMySQL, dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    dbMsSQL, dbMySQL, dbPostGreSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
@@ -1003,7 +1003,7 @@ end;
 function TPowerSQLBuilder.Field(Value: TDate; Mask: String): TPowerSQLBuilder;
 begin
   if Mask = '' then
-    Mask := 'yyyy.mm.dd';
+    Mask := 'yyyy-mm-dd';
 
   if YearOf(Value) < 1890 then
     Value := 0;
@@ -1041,13 +1041,13 @@ end;
 function TPowerSQLBuilder.FieldOfDate(Value: TDateTime; Mask : String ): TPowerSQLBuilder;
 begin
   if Mask = '' then
-    Mask := 'yyyy.mm.dd';
+    Mask := 'yyyy-mm-dd';
 
   if YearOf(Value) < 1890 then
     Value := 0;
 
   case Self.FSGDBType of
-    dbMySQL, dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    dbMsSQL, dbMySQL, dbPostGreSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
@@ -1629,7 +1629,7 @@ end;
 function TPowerSQLBuilder.TestDate(Value: TDateTime;Condition: String; Mask : String): TPowerSQLBuilder;
 begin
   if Mask = '' then
-    Mask := 'yyyy.mm.dd hh:nn:ss';
+    Mask := 'yyyy-mm-dd hh:nn:ss';
 
   Add(' ').Add( Condition ).Add(' ');
 
@@ -1637,7 +1637,7 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbMySQL, dbPostGreSQL, dbFireBird, dbMsSQL, dbDB2, dbMongo, dbNenhum:
+    dbMsSQL, dbMySQL, dbPostGreSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
@@ -1687,7 +1687,7 @@ end;
 function TPowerSQLBuilder.TestOfDate(Value: TDateTime;Condition: String; Mask : String): TPowerSQLBuilder;
 begin
   if Mask = '' then
-    Mask := 'yyyy.mm.dd';
+    Mask := 'yyyy-mm-dd';
 
   Add(' ').Add( Condition ).Add(' ');
 
@@ -1695,7 +1695,7 @@ begin
     Value := 0;
 
   case Self.FSGDBType of
-    dbMySQL, dbPostGreSQL, dbMsSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
+    dbMsSQL, dbMySQL, dbPostGreSQL, dbFireBird, dbDB2, dbMongo, dbNenhum:
     begin
       if DateOf(Value) = 0 then
         Add('null')
